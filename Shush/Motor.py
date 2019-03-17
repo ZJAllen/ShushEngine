@@ -370,7 +370,7 @@ class Motor(sBoard):
         time.sleep(0.0001)
 
         # Begin transmission by pulling CS pin low
-        gpio.output(self.chipSelect, gpio.LOW)
+        # gpio.output(self.chipSelect, gpio.LOW)
 
         # Delay 10 us before sending data
         time.sleep(0.00001)
@@ -382,18 +382,30 @@ class Motor(sBoard):
         # self.xfer(data >> 8)
         # self.xfer(data)
 
-        datagram |= self.xfer((data >> 24))
-        datagram <<= 8
-        datagram |= self.xfer((data >> 16))
-        datagram <<= 8
-        datagram |= self.xfer((data >> 8))
-        datagram <<= 8
-        datagram |= self.xfer((data))
+        # datagram |= self.xfer((data >> 24))
+        # datagram <<= 8
+        # datagram |= self.xfer((data >> 16))
+        # datagram <<= 8
+        # datagram |= self.xfer((data >> 8))
+        # datagram <<= 8
+        # datagram |= self.xfer((data))
+
+        datagram[0] = address
+        datagram[1] = (data >> 24) & 0xff
+        datagram[2] = (data >> 16) & 0xff
+        datagram[3] = (data >> 8) & 0xff
+        datagram[4] = data & 0xff
+
+        # Begin transmission by pulling CS pin low
+        gpio.output(self.chipSelect, gpio.LOW)
+
+        # Send datagram
+        response = sBoard.spi.xfer2(datagram)
 
         # End transmission by pulling CS pin HIGH
         gpio.output(self.chipSelect, gpio.HIGH)
 
-        print("Received: ", datagram)
+        print("Received: ", response)
 
     def xfer(self, data):
 
