@@ -347,32 +347,48 @@ class Motor(sBoard):
     # Send data to the SPI bus
     def sendData(self, address, data):
         # Initialize datagram variable
-        datagram = 0
+        # datagram = 0
 
         # Delay 100 us
-        time.sleep(0.0001)
+        # time.sleep(0.0001)
 
         # Begin transmission by pulling CS pin low
-        gpio.output(self.chipSelect, gpio.LOW)
+        # gpio.output(self.chipSelect, gpio.LOW)
 
         # Delay 10 us before sending data
-        time.sleep(0.00001)
+        # time.sleep(0.00001)
 
         # Send data 8 bits at a time
-        datagram |= sBoard.spi.xfer([(data >> 24) & 0xff])
-        datagram <<= 8
-        datagram |= sBoard.spi.xfer([(data >> 16) & 0xff])
-        datagram <<= 8
-        datagram |= sBoard.spi.xfer([(data >> 8) & 0xff])
-        datagram <<= 8
-        datagram |= sBoard.spi.xfer([(data) & 0xff])
+        self.xfer(address)
+        self.xfer(data >> 24)
+        self.xfer(data >> 16)
+        self.xfer(data >> 8)
+        self.xfer(data)
+
+        # datagram |= sBoard.spi.xfer([(data >> 24) & 0xff])
+        # datagram <<= 8
+        # datagram |= sBoard.spi.xfer([(data >> 16) & 0xff])
+        # datagram <<= 8
+        # datagram |= sBoard.spi.xfer([(data >> 8) & 0xff])
+        # datagram <<= 8
+        # datagram |= sBoard.spi.xfer([(data) & 0xff])
 
         # End transmission by pulling CS pin HIGH
+        # gpio.output(self.chipSelect, gpio.HIGH)
+
+        # print("Received: ", datagram)
+
+    def xfer(self, data):
+
+        #mask the value to a byte format for transmision
+        data = (int(data) & 0xff)
+
+        #toggle chip select and SPI transfer
+        gpio.output(self.chipSelect, gpio.LOW)
+        response = sBoard.spi.xfer2([data])
         gpio.output(self.chipSelect, gpio.HIGH)
 
-        print("Received: ", datagram)
-
-
+        return response[0]
 
     ''' All these need to be updated
     # set a parameter of the motor driver
