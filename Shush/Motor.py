@@ -359,13 +359,13 @@ class Motor(sBoard):
         time.sleep(0.00001)
 
         # Send data 8 bits at a time
-        datagram |= spi.xfer([(data >> 24) & 0xff])
+        datagram |= sBoard.spi.xfer([(data >> 24) & 0xff])
         datagram <<= 8
-        datagram |= spi.xfer([(data >> 16) & 0xff])
+        datagram |= sBoard.spi.xfer([(data >> 16) & 0xff])
         datagram <<= 8
-        datagram |= spi.xfer([(data >> 8) & 0xff])
+        datagram |= sBoard.spi.xfer([(data >> 8) & 0xff])
         datagram <<= 8
-        datagram |= spi.xfer([(data) & 0xff])
+        datagram |= sBoard.spi.xfer([(data) & 0xff])
 
         # End transmission by pulling CS pin HIGH
         gpio.output(self.chipSelect, gpio.HIGH)

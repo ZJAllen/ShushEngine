@@ -57,12 +57,12 @@ class sBoard:
 
   def initSPI(self):
     # Initialize SPI Bus for motor drivers
-    spi = spidev.SpiDev()
-    spi.open(0,0)               # Open(Bus, Device)
-    spi.max_speed_hz = 1000000  # 1 MHZ
-    spi.bits_per_word = 8       # 8 bits per word (32-bit word is broken into 3x 8-bit words)
-    spi.loop = False
-    spi.mode = 3                # SPI Mode 3
+    sBoard.spi = spidev.SpiDev()
+    sBoard.spi.open(0,0)               # Open(Bus, Device)
+    sBoard.spi.max_speed_hz = 1000000  # 1 MHZ
+    sBoard.spi.bits_per_word = 8       # 8 bits per word (32-bit word is broken into 3x 8-bit words)
+    sBoard.spi.loop = False
+    sBoard.spi.mode = 3                # SPI Mode 3
 
   def deinitBoard(self):
     # Closes the board and releases the peripherals
