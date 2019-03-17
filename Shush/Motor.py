@@ -28,7 +28,7 @@ class Motor(sBoard):
         self.initPeripherals()
 
 
-''' Need to update all this stuff
+    ''' Need to update all this stuff
     # initalise the appropriate pins and buses
     def initPeripherals(self):
 
@@ -171,14 +171,14 @@ class Motor(sBoard):
         self.xfer(n_stepABS)
 
 
-'''
+    '''
 
     # Move to an absolute position from Home (0) position
     def goTo(self, pos):
         if pos > 0x3fffff: pos = 0x3fffff
         self.write(XTARGET, pos)
 
-'''
+    '''
     # same as go to but with a forced direction
     def goToDir(self, dir, pos):
         self.xfer(LReg.GOTO_DIR)
