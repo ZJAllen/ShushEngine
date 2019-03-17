@@ -358,7 +358,7 @@ class Motor(sBoard):
     def write(self, address, data):
         # For write, add 0x80 to address
         address = address | 0x80
-        print(address)
+        print('0x{:02x}'.format(address))
         self.sendData(address, data)
 
     # Send data to the SPI bus
