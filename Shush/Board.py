@@ -2,6 +2,7 @@ __author__ = 'ZJAllen'
 
 import Shush.Boards.ShushEngine_MKI as SL1
 from Shush.Base import *
+import spidev
 
 # Need to update everything
 class sBoard:
@@ -58,12 +59,12 @@ class sBoard:
 
   def initSPI(self):
     # Initialize SPI Bus for motor drivers
-    sBoard.spi = spidev.SpiDev()
-    sBoard.spi.open(0,0)                # Open(Bus, Device)
-    sBoard.spi.max_speed_hz = 1000000   # 1 MHZ
-    sBoard.spi.bits_per_word = 32       # 32 bits per word
-    sBoard.spi.loop = False
-    sBoard.spi.mode = 3                 # SPI Mode 3
+    spi = spidev.SpiDev()
+    spi.open(0,0)                # Open(Bus, Device)
+    spi.max_speed_hz = 1000000   # 1 MHZ
+    spi.bits_per_word = 32       # 32 bits per word
+    spi.loop = False
+    spi.mode = 3                 # SPI Mode 3
 
   def deinitBoard(self):
     # Closes the board and releases the peripherals
