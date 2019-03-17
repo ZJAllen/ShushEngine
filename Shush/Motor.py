@@ -189,7 +189,9 @@ class Motor(sBoard):
     '''
     # Get the posistion of the motor
     def getPos(self):
-        return self.convert(self.read(Registers.XACTUAL))
+        curPos = self.read(Registers.XACTUAL))
+        print("Current Pos: ", curPos)
+        return curPos
 
     # Move to an absolute position from Home (0) position
     def goTo(self, pos):
@@ -333,7 +335,7 @@ class Motor(sBoard):
     def read(self, address, data):
         self.sendData(address, data)
         readValue = sBoard.spi.readbytes(5)
-        return readValue
+        return self.convert(self.param(readValue))
 
     # Write data to the SPI bus
     def write(self, address, data):
@@ -412,11 +414,12 @@ class Motor(sBoard):
         return self.paramHandler(param, value)
     '''
 
+    '''
     # Get a parameter from the motor driver
     def getParam(self, param):
         self.xfer(LReg.GET_PARAM | param[0])
         return self.paramHandler(param, 0)
-
+    '''
 
     # Convert twos compliment
     def convert(self, val):
@@ -429,8 +432,10 @@ class Motor(sBoard):
         return self.param(value, param[1])
 
     # Utility function
-    def param(self, value, 4):
+    def param(self, value):
         ret_value = 0
+
+        bit_len = 40
 
         byte_len = bit_len/8
         if (bit_len%8 > 0): byte_len +=1
