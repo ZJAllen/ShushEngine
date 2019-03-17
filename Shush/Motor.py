@@ -130,9 +130,7 @@ class Motor(sBoard):
         decelerationBytes = self.decCalc(deceleration)
         self.setParam(LReg.DEC, decelerationBytes)
 
-    # get the posistion of the motor
-    def getPosition(self):
-        return self.convert(self.getParam(LReg.ABS_POS))
+
 
     # get the speed of the motor
     def getSpeed(self):
@@ -189,6 +187,9 @@ class Motor(sBoard):
 
 
     '''
+    # Get the posistion of the motor
+    def getPos(self):
+        return self.convert(self.read(Registers.XACTUAL))
 
     # Move to an absolute position from Home (0) position
     def goTo(self, pos):
@@ -326,33 +327,13 @@ class Motor(sBoard):
         if temp > float(0x000fffff): return 0x000fffff
         else: return round(temp)
 
-    # utility function
-    def param(self, value, bit_len):
-        ret_value = 0
-
-        byte_len = bit_len/8
-        if (bit_len%8 > 0): byte_len +=1
-
-        mask = 0xffffffff >> (32 - bit_len)
-        if value > mask: value = mask
-
-        if byte_len >= 3.0:
-            temp = self.xfer(value >> 16)
-            ret_value |= temp << 16
-        if byte_len >= 2.0:
-            temp = self.xfer(value >>8)
-            ret_value |= temp << 8
-        if byte_len >= 1.0:
-            temp = self.xfer(value)
-            ret_value |= temp
-
-        return (ret_value & mask)
-
     '''
 
     # Read data from the SPI bus
     def read(self, address, data):
         self.sendData(address, data)
+        readValue = sBoard.spi.readbytes(5)
+        return readValue
 
     # Write data to the SPI bus
     def write(self, address, data):
@@ -390,11 +371,11 @@ class Motor(sBoard):
         # datagram <<= 8
         # datagram |= self.xfer((data))
 
-        datagram[0] = address
-        datagram[1] = (data >> 24) & 0xff
-        datagram[2] = (data >> 16) & 0xff
-        datagram[3] = (data >> 8) & 0xff
-        datagram[4] = data & 0xff
+        datagram = [(address & 0xFF)]
+        datagram.append( (data >> 24) & 0xFF )
+        datagram.append( (data >> 16) & 0xFF )
+        datagram.append( (data >> 8) & 0xFF )
+        datagram.append( data & 0xFF )
 
         # Begin transmission by pulling CS pin low
         gpio.output(self.chipSelect, gpio.LOW)
@@ -405,7 +386,10 @@ class Motor(sBoard):
         # End transmission by pulling CS pin HIGH
         gpio.output(self.chipSelect, gpio.HIGH)
 
-        print("Received: ", response)
+        # Refactor response for a readable integer and hex
+        # response = int(''.join(map(str,response)))
+
+        # return response
 
     def xfer(self, data):
 
@@ -426,20 +410,45 @@ class Motor(sBoard):
     def setParam(self, param, value):
         self.xfer(LReg.SET_PARAM | param[0])
         return self.paramHandler(param, value)
+    '''
 
-    # get a parameter from the motor driver
+    # Get a parameter from the motor driver
     def getParam(self, param):
         self.xfer(LReg.GET_PARAM | param[0])
         return self.paramHandler(param, 0)
 
-    # convert twos compliment
+
+    # Convert twos compliment
     def convert(self, val):
         if val > 0x400000/2:
             val = val - 0x400000
         return val
 
-    # switch case to handle parameters
+    # Switch case to handle parameters
     def paramHandler(self, param, value):
         return self.param(value, param[1])
 
-    '''
+    # Utility function
+    def param(self, value, 4):
+        ret_value = 0
+
+        byte_len = bit_len/8
+        if (bit_len%8 > 0): byte_len +=1
+
+        mask = 0xffffffff >> (32 - bit_len)
+        if value > mask: value = mask
+
+        if byte_len >= 4.0:
+            temp = self.xfer(value >> 24)
+            ret_value |= temp << 24
+        if byte_len >= 3.0:
+            temp = self.xfer(value >> 16)
+            ret_value |= temp << 16
+        if byte_len >= 2.0:
+            temp = self.xfer(value >>8)
+            ret_value |= temp << 8
+        if byte_len >= 1.0:
+            temp = self.xfer(value)
+            ret_value |= temp
+
+        return (ret_value & mask)
