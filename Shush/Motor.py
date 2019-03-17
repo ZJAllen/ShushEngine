@@ -25,7 +25,7 @@ class Motor(sBoard):
             self.chipSelect = SL1.M5_CS
 
         # Initialize the hardware
-        self.initPeripherals()
+        # self.initPeripherals()
 
 
     ''' Need to update all this stuff
@@ -176,7 +176,7 @@ class Motor(sBoard):
     # Move to an absolute position from Home (0) position
     def goTo(self, pos):
         if pos > 0x3fffff: pos = 0x3fffff
-        self.write(XTARGET, pos)
+        self.write(Register.XTARGET, pos)
 
     '''
     # same as go to but with a forced direction

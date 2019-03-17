@@ -1,6 +1,6 @@
 '''
 Registers from the TMC5160 datasheet:
-https://www.trinamic.com/fileadmin/assets/Products/ICs_Documents/TMC5160_Datasheet_V1.01.pdf    
+https://www.trinamic.com/fileadmin/assets/Products/ICs_Documents/TMC5160_Datasheet_V1.01.pdf
 '''
 
 class TMC5160_Registers:
