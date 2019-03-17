@@ -336,16 +336,19 @@ class Motor(sBoard):
 
     # Read data from the SPI bus
     def read(self, address, data):
-        sendData(address, data)
+        self.sendData(address, data)
 
     # Write data to the SPI bus
     def write(self, address, data):
         # For write, add 0x80 to address
         address = address | 0x80
-        sendData(address, data)
+        self.sendData(address, data)
 
     # Send data to the SPI bus
     def sendData(self, address, data):
+        # Initialize datagram variable
+        datagram = 0
+
         # Delay 100 us
         time.sleep(0.0001)
 
