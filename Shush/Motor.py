@@ -27,6 +27,22 @@ class Motor(sBoard):
 
         # Initialize the hardware
         # self.initPeripherals()
+        self.defaultSettings()
+
+    # Set default motor parameters
+    def defaultSettings(self):
+        self.write(Register.VSTART, 1)
+        self.write(Register.A1, 5000)
+        self.write(Register.V1, 50000)
+        self.write(Register.AMAX, 5000)
+        self.write(Register.VMAX, 100000)
+        self.write(Register.DMAX, 5000)
+        self.write(Register.D1, 5000)
+        self.write(Register.VSTOP, 10)
+
+        self.write(Register.RAMPMODE, 0)
+        self.write(Register.XACTUAL, 0)
+        self.write(Register.XTARGET, 0)
 
 
     ''' Need to update all this stuff
@@ -342,51 +358,54 @@ class Motor(sBoard):
     def write(self, address, data):
         # For write, add 0x80 to address
         address = address | 0x80
+        print(address)
         self.sendData(address, data)
 
     # Send data to the SPI bus
     def sendData(self, address, data):
         # Initialize datagram variable
-        # datagram = 0
+        datagram = 0
 
         # Delay 100 us
-        # time.sleep(0.0001)
+        time.sleep(0.0001)
 
         # Begin transmission by pulling CS pin low
-        # gpio.output(self.chipSelect, gpio.LOW)
+        gpio.output(self.chipSelect, gpio.LOW)
 
         # Delay 10 us before sending data
-        # time.sleep(0.00001)
+        time.sleep(0.00001)
 
         # Send data 8 bits at a time
-        self.xfer(address)
-        self.xfer(data >> 24)
-        self.xfer(data >> 16)
-        self.xfer(data >> 8)
-        self.xfer(data)
+        # self.xfer(address)
+        # self.xfer(data >> 24)
+        # self.xfer(data >> 16)
+        # self.xfer(data >> 8)
+        # self.xfer(data)
 
-        # datagram |= sBoard.spi.xfer([(data >> 24) & 0xff])
-        # datagram <<= 8
-        # datagram |= sBoard.spi.xfer([(data >> 16) & 0xff])
-        # datagram <<= 8
-        # datagram |= sBoard.spi.xfer([(data >> 8) & 0xff])
-        # datagram <<= 8
-        # datagram |= sBoard.spi.xfer([(data) & 0xff])
+        datagram |= self.xfer((data >> 24))
+        datagram <<= 8
+        datagram |= self.xfer((data >> 16))
+        datagram <<= 8
+        datagram |= self.xfer((data >> 8))
+        datagram <<= 8
+        datagram |= self.xfer((data))
 
         # End transmission by pulling CS pin HIGH
-        # gpio.output(self.chipSelect, gpio.HIGH)
+        gpio.output(self.chipSelect, gpio.HIGH)
 
-        # print("Received: ", datagram)
+        print("Received: ", datagram)
 
     def xfer(self, data):
 
-        #mask the value to a byte format for transmision
+        # Mask the value to a byte format for transmision
         data = (int(data) & 0xff)
 
         #toggle chip select and SPI transfer
-        gpio.output(self.chipSelect, gpio.LOW)
+        # gpio.output(self.chipSelect, gpio.LOW)
+        # gpio.output(self.chipSelect, gpio.HIGH)
+
+        # Get response back from SPI transfer
         response = sBoard.spi.xfer2([data])
-        gpio.output(self.chipSelect, gpio.HIGH)
 
         return response[0]
 
