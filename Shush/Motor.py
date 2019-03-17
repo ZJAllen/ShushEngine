@@ -13,6 +13,7 @@ class Motor(sBoard):
         # Setting the CS pin according to the motor called
         if motor == 0:
             self.chipSelect = SL1.M0_CS
+            print("Chip Select: ", self.chipSelect)
         if motor == 1:
             self.chipSelect = SL1.M1_CS
         if motor == 2:
@@ -345,8 +346,11 @@ class Motor(sBoard):
 
     # Send data to the SPI bus
     def sendData(self, address, data):
+        # Delay 100 us
+        time.sleep(0.0001)
+
         # Begin transmission by pulling CS pin low
-        gpio.output(self.ChipSelect, gpio.LOW)
+        gpio.output(self.chipSelect, gpio.LOW)
 
         # Delay 10 us before sending data
         time.sleep(0.00001)
@@ -361,7 +365,7 @@ class Motor(sBoard):
         datagram |= spi.xfer([(data) & 0xff])
 
         # End transmission by pulling CS pin HIGH
-        gpio.output(self.ChipSelect, gpio.HIGH)
+        gpio.output(self.chipSelect, gpio.HIGH)
 
         print("Received: ", datagram)
 
