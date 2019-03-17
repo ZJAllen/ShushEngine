@@ -2,9 +2,7 @@ __author__ = 'ZJAllen'
 
 import Shush.Boards.ShushEngine_MKI as SL1
 from Shush.Base import *
-import spidev
 
-# Need to update everything
 class sBoard:
   chip = 0
   bus = 0
@@ -44,7 +42,7 @@ class sBoard:
     # gpio.setup(SL1.MCP23_Reset, gpio.OUT)
     # gpio.output(SL1.MCP23_Reset, gpio.HIGH)
 
-    resetDrivers()
+    #self.resetDrivers()
 
   def resetDrivers(self):
     # Reset all drivers

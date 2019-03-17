@@ -5,6 +5,10 @@ import time
 import os
 import sys
 
+import spidev as spidev
+import RPi.GPIO as gpio
+
+'''
 # Include the spidev module and check if SPI is enabled
 try:
   import spidev as spidev
@@ -16,3 +20,4 @@ except ImportError:
     import RPi.GPIO as gpio
   except ImportError:
     raise ImportError("Cannot load the Raspberry Pi GPIO drivers")
+'''
