@@ -1,7 +1,7 @@
 __author__ = 'ZJAllen'
 
-import Shush.Boards.SlushEngine_MKI as SL1
-from Slush.Base import *
+import Shush.Boards.ShushEngine_MKI as SL1
+from Shush.Base import *
 
 # Need to update everything
 class sBoard:
