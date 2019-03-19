@@ -8,6 +8,8 @@ import sys
 import spidev as spidev
 import RPi.GPIO as gpio
 
+gpio.setwarnings(False)
+
 '''
 # Include the spidev module and check if SPI is enabled
 try:
