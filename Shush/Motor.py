@@ -359,7 +359,7 @@ class Motor(sBoard):
         value = value << 8
         value |= readValue[4]
 
-        retrun value
+        return value
 
     # Write data to the SPI bus
     def write(self, address, data):
