@@ -47,11 +47,11 @@ class Motor(sBoard):
         self.write(Register.TPWMTHRS, 0x000001F4)
 
         self.write(Register.VSTART, 1)
-        self.write(Register.A1, 5000)
+        self.write(Register.A1, 50000)
         self.write(Register.V1, 50000)
-        self.write(Register.AMAX, 5000)
-        self.write(Register.VMAX, 1000000)
-        self.write(Register.DMAX, 5000)
+        self.write(Register.AMAX, 500000)
+        self.write(Register.VMAX, 5000000)
+        self.write(Register.DMAX, 50000)
         self.write(Register.D1, 5000)
         self.write(Register.VSTOP, 10)
 
