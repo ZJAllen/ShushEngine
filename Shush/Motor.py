@@ -31,6 +31,21 @@ class Motor(sBoard):
 
     # Set default motor parameters
     def defaultSettings(self):
+        # MULTISTEP_FILT = 1, EN_PWM_MODE = 1 enables stealthChop
+        self.write(Register.GCONF, 0x0000000C)
+
+        # TOFF = 3, HSTRT = 4, HEND = 1, TBL = 2, CHM = 0 (spreadCycle)
+        self.write(Register.CHOPCONF, 0x000100C3)
+
+        # IHOLD = 8, IRUN = 15 (max current), IHOLDDELAY = 6
+        self.write(Register.IHOLD_IRUN, 0x00080F0A)
+
+        # TPOWERDOWN = 10: Delay before powerdown in standstill
+        self.write(Register.TPOWERDOWN, 0x0000000A)
+
+        #TPWMTHRS = 500
+        self.write(Register.TPWMTHRS, 0x000001F4)
+
         self.write(Register.VSTART, 1)
         self.write(Register.A1, 5000)
         self.write(Register.V1, 50000)
@@ -189,7 +204,7 @@ class Motor(sBoard):
     '''
     # Get the posistion of the motor
     def getPos(self):
-        curPos = self.read(Registers.XACTUAL))
+        curPos = self.read(Registers.XACTUAL, 0)
         print("Current Pos: ", curPos)
         return curPos
 
@@ -336,14 +351,13 @@ class Motor(sBoard):
         self.sendData(address, data)
         readValue = sBoard.spi.readbytes(5)
         # return self.convert(self.param(readValue))
-        value = readValue(1)
+        value = readValue[1]
         value = value << 8
-        value |= readValue(2)
+        value |= readValue[2]
         value = value << 8
-        value |= readValue(3)
+        value |= readValue[3]
         value = value << 8
-        value |= readValue(4)
-        value = value << 8
+        value |= readValue[4]
 
         retrun value
 
