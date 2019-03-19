@@ -204,7 +204,7 @@ class Motor(sBoard):
     '''
     # Get the posistion of the motor
     def getPos(self):
-        curPos = self.read(Registers.XACTUAL, 0)
+        curPos = self.read(Register.XACTUAL, 0)
         print("Current Pos: ", curPos)
         return curPos
 
