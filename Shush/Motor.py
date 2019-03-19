@@ -35,7 +35,7 @@ class Motor(sBoard):
         self.write(Register.A1, 5000)
         self.write(Register.V1, 50000)
         self.write(Register.AMAX, 5000)
-        self.write(Register.VMAX, 100000)
+        self.write(Register.VMAX, 1000000)
         self.write(Register.DMAX, 5000)
         self.write(Register.D1, 5000)
         self.write(Register.VSTOP, 10)
@@ -335,7 +335,17 @@ class Motor(sBoard):
     def read(self, address, data):
         self.sendData(address, data)
         readValue = sBoard.spi.readbytes(5)
-        return self.convert(self.param(readValue))
+        # return self.convert(self.param(readValue))
+        value = readValue(1)
+        value = value << 8
+        value |= readValue(2)
+        value = value << 8
+        value |= readValue(3)
+        value = value << 8
+        value |= readValue(4)
+        value = value << 8
+
+        retrun value
 
     # Write data to the SPI bus
     def write(self, address, data):
@@ -427,6 +437,7 @@ class Motor(sBoard):
             val = val - 0x400000
         return val
 
+    '''
     # Switch case to handle parameters
     def paramHandler(self, param, value):
         return self.param(value, param[1])
@@ -457,3 +468,4 @@ class Motor(sBoard):
             ret_value |= temp
 
         return (ret_value & mask)
+    '''
