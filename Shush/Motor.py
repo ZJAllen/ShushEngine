@@ -1,6 +1,6 @@
 __author__ = 'ZJAllen'
 
-from Shush.Board import *
+from Shush.Board import * as sBoard
 from Shush.Drivers import TMC5160_Registers as Register
 import math
 
@@ -13,21 +13,34 @@ class Motor(sBoard):
         # Setting the CS pin according to the motor called
         if motor == 0:
             self.chipSelect = SL1.M0_CS
-            print("Chip Select: ", self.chipSelect)
+            self.enablePin = SL1.M0_Enable
         if motor == 1:
             self.chipSelect = SL1.M1_CS
+            self.enablePin = SL1.M1_Enable
         if motor == 2:
             self.chipSelect = SL1.M2_CS
+            self.enablePin = SL1.M2_Enable
         if motor == 3:
             self.chipSelect = SL1.M3_CS
+            self.enablePin = SL1.M3_Enable
         if motor == 4:
             self.chipSelect = SL1.M4_CS
+            self.enablePin = SL1.M4_Enable
         if motor == 5:
             self.chipSelect = SL1.M5_CS
+            self.enablePin = SL1.M5_Enable
 
         # Initialize the hardware
         # self.initPeripherals()
         self.defaultSettings()
+
+    def enableMotor(self):
+        # Pull all Enable pin LOW (pull HIGH to disable motor)
+        sBoard.gpio.output(self.enablePin, gpio.LOW)
+
+    def enableMotor(self):
+        # Pull all Enable pin LOW (pull HIGH to disable motor)
+        sBoard.gpio.output(self.enablePin, gpio.HIGH)
 
     # Set default motor parameters
     def defaultSettings(self):
@@ -350,7 +363,6 @@ class Motor(sBoard):
     def read(self, address, data):
         self.sendData(address, data)
         readValue = sBoard.spi.readbytes(5)
-        # return self.convert(self.param(readValue))
         value = readValue[1]
         value = value << 8
         value |= readValue[2]
@@ -365,7 +377,7 @@ class Motor(sBoard):
     def write(self, address, data):
         # For write, add 0x80 to address
         address = address | 0x80
-        print('0x{:02x}'.format(address))
+        #print('0x{:02x}'.format(address))
         self.sendData(address, data)
 
     # Send data to the SPI bus
@@ -376,26 +388,8 @@ class Motor(sBoard):
         # Delay 100 us
         time.sleep(0.0001)
 
-        # Begin transmission by pulling CS pin low
-        # gpio.output(self.chipSelect, gpio.LOW)
-
         # Delay 10 us before sending data
         time.sleep(0.00001)
-
-        # Send data 8 bits at a time
-        # self.xfer(address)
-        # self.xfer(data >> 24)
-        # self.xfer(data >> 16)
-        # self.xfer(data >> 8)
-        # self.xfer(data)
-
-        # datagram |= self.xfer((data >> 24))
-        # datagram <<= 8
-        # datagram |= self.xfer((data >> 16))
-        # datagram <<= 8
-        # datagram |= self.xfer((data >> 8))
-        # datagram <<= 8
-        # datagram |= self.xfer((data))
 
         datagram = [(address & 0xFF)]
         datagram.append( (data >> 24) & 0xFF )
@@ -412,19 +406,12 @@ class Motor(sBoard):
         # End transmission by pulling CS pin HIGH
         gpio.output(self.chipSelect, gpio.HIGH)
 
-        # Refactor response for a readable integer and hex
-        # response = int(''.join(map(str,response)))
-
         # return response
 
     def xfer(self, data):
 
         # Mask the value to a byte format for transmision
         data = (int(data) & 0xff)
-
-        #toggle chip select and SPI transfer
-        # gpio.output(self.chipSelect, gpio.LOW)
-        # gpio.output(self.chipSelect, gpio.HIGH)
 
         # Get response back from SPI transfer
         response = sBoard.spi.xfer2([data])
@@ -436,14 +423,11 @@ class Motor(sBoard):
     def setParam(self, param, value):
         self.xfer(LReg.SET_PARAM | param[0])
         return self.paramHandler(param, value)
-    '''
 
-    '''
     # Get a parameter from the motor driver
     def getParam(self, param):
         self.xfer(LReg.GET_PARAM | param[0])
         return self.paramHandler(param, 0)
-    '''
 
     # Convert twos compliment
     def convert(self, val):
@@ -451,7 +435,6 @@ class Motor(sBoard):
             val = val - 0x400000
         return val
 
-    '''
     # Switch case to handle parameters
     def paramHandler(self, param, value):
         return self.param(value, param[1])
