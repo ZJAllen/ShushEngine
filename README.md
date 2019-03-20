@@ -75,4 +75,4 @@ while(True):
 
 Save this anywhere you’d like, on your Desktop for example. We’ll call it ShushExample.py. Change directory into that folder by `cd Desktop`.
 
-Now, you can call the script my typing `python3 ShushExample.py` and the motor should start spinning.
+Now, you can call the script by typing `python3 ShushExample.py` and the motor should start spinning.
