@@ -1,3 +1,3 @@
 # ShushEngine
 The Python stepper motor driver for Trinamic's TMC5160 motion controller chip.
-Built from @Roboteurs 's project [slushengine](https://github.com/Roboteurs/slushengine)
+Built from [Roboteurs](https://roboteurs.com/)'s project [SlushEngine](https://github.com/Roboteurs/slushengine)
