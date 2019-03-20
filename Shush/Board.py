@@ -30,6 +30,14 @@ class sBoard:
     gpio.setup(SL1.M4_CS, gpio.OUT)
     gpio.setup(SL1.M5_CS, gpio.OUT)
 
+    # Define enable pins
+    gpio.setup(SL1.M0_Enable, gpio.OUT)
+    gpio.setup(SL1.M1_Enable, gpio.OUT)
+    gpio.setup(SL1.M2_Enable, gpio.OUT)
+    gpio.setup(SL1.M3_Enable, gpio.OUT)
+    gpio.setup(SL1.M4_Enable, gpio.OUT)
+    gpio.setup(SL1.M5_Enable, gpio.OUT)
+
     # Pull all CS pins HIGH (LOW initializes data transmission)
     gpio.output(SL1.M0_CS, gpio.HIGH)
     gpio.output(SL1.M1_CS, gpio.HIGH)
