@@ -38,8 +38,8 @@ class Motor(sBoard):
         # Pull all Enable pin LOW (pull HIGH to disable motor)
         gpio.output(self.enablePin, gpio.LOW)
 
-    def enableMotor(self):
-        # Pull all Enable pin LOW (pull HIGH to disable motor)
+    def disableMotor(self):
+        # Pull all Enable pin HIGH
         gpio.output(self.enablePin, gpio.HIGH)
 
     # Set default motor parameters
