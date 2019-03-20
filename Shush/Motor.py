@@ -1,6 +1,6 @@
 __author__ = 'ZJAllen'
 
-from Shush.Board import * as sBoard
+from Shush.Board import *
 from Shush.Drivers import TMC5160_Registers as Register
 import math
 
