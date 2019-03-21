@@ -217,8 +217,9 @@ class Motor(sBoard):
     '''
     # Get the posistion of the motor
     def getPos(self):
-        curPos = self.read(Register.XACTUAL, 0)
+        curPos = self.read(Register.XACTUAL)
         print("Current Pos: ", curPos)
+
         return curPos
 
     # Move to an absolute position from Home (0) position
@@ -226,159 +227,36 @@ class Motor(sBoard):
         if pos > 0x3fffff: pos = 0x3fffff
         self.write(Register.XTARGET, pos)
 
-    '''
-    # same as go to but with a forced direction
-    def goToDir(self, dir, pos):
-        self.xfer(LReg.GOTO_DIR)
-        if pos > 0x3fffff: pos = 0x3fffff
-        self.xfer(pos >> 16)
-        self.xfer(pos >> 8)
-        self.xfer(pos)
-
-    # sets the hardstop option for the limit switch
-    def setLimitHardStop(self, stop):
-        if stop == 1: self.setParam([0x1A, 16], 0x3608)
-        if stop == 0: self.setParam([0x1A, 16], 0x3618)
-
-    # go until switch press event occurs
-    def goUntilPress(self, act, dir, spd):
-        self.xfer(LReg.GO_UNTIL | act | dir)
-        if spd > 0x3fffff: spd = 0x3fffff
-        self.xfer(spd >> 16)
-        self.xfer(spd >> 8)
-        self.xfer(spd)
-
-    def getSwitch(self):
-        if self.getStatus() & 0x4: return 1
-        else: return 0
-
-    # go until switch release event occurs
-    def goUntilRelease(self, act, dir):
-        self.xfer(LReg.RELEASE_SW | act | dir)
-
-    # reads the value of the switch
-    def readSwitch(self):
-        if self.getStatus() & 0x4: return 1
-        else: return 0
-
-    # go home
-    def goHome(self):
-        self.xfer(LReg.GO_HOME)
-
-    # go to mark position
-    def goMark(self):
-        self.xfer(LReg.GO_MARK)
-
-    # set mark point
-    def setMark(self, value):
-
-        if value == 0: value = self.getPosition()
-        self.xfer(LReg.MARK)
-        if value > 0x3fffff: value = 0x3fffff
-        if value < -0x3fffff: value = -0x3fffff
-
-        self.xfer(value >> 16)
-        self.xfer(value >> 8)
-        self.xfer(value)
-
-    # set current position to the home position
-    def setAsHome(self):
-        self.xfer(LReg.RESET_POS)
-
-    # reset the device to initial conditions
-    def resetDev(self):
-        self.xfer(LReg.RESET_DEVICE)
-        if self.boardInUse == 1: self.setParam([0x1A, 16], 0x3608)
-        if self.boardInUse == 0: self.setParam([0x1A, 16], 0x3608)
-
-    # stop the motor using the decel
-    def softStop(self):
-        self.xfer(LReg.SOFT_STOP)
-
-    # hard stop the motor without concern for decel curve
-    def hardStop(self):
-        self.xfer(LReg.HARD_STOP)
-
-    # decelerate the motor and the disable hold
-    def softFree(self):
-        self.xfer(LReg.SOFT_HIZ)
-
-    # disable hold
-    def free(self):
-        self.xfer(LReg.HARD_HIZ)
-
-    # get the status of the motor
-    def getStatus(self):
-        temp = 0;
-        self.xfer(LReg.GET_STATUS)
-        temp = self.xfer(0) << 8
-        temp += self.xfer(0)
-        return temp
-
-    # calculates the value of the ACC register
-    def accCalc(self, stepsPerSecPerSec):
-        temp = float(stepsPerSecPerSec) * 0.137438
-        if temp > 4095.0: return 4095
-        else: return round(temp)
-
-    # calculated the value of the DEC register
-    def decCalc(self, stepsPerSecPerSec):
-        temp = float(stepsPerSecPerSec) * 0.137438
-        if temp > 4095.0: return 4095
-        else: return round(temp)
-
-    # calculates the max speed register
-    def maxSpdCalc(self, stepsPerSec):
-        temp = float(stepsPerSec) * 0.065536
-        if temp > 1023.0: return 1023
-        else: return round(temp)
-
-    # calculates the min speed register
-    def minSpdCalc(self, stepsPerSec):
-        temp = float(stepsPerSec) * 4.1943
-        if temp > 4095.0: return 4095
-        else: return round(temp)
-
-    # calculates the value of the FS speed register
-    def fsCalc(self, stepsPerSec):
-        temp = (float(stepsPerSec) * 0.065536) - 0.5
-        if temp > 1023.0: return 1023
-        else: return round(temp)
-
-    # calculates the value of the INT speed register
-    def intSpdCalc(self, stepsPerSec):
-        temp = float(stepsPerSec) * 4.1943
-        if temp > 16383.0: return 16383
-        else: return round(temp)
-
-    # calculate speed
-    def spdCalc(self, stepsPerSec):
-        temp = float(stepsPerSec) * 67.106
-        if temp > float(0x000fffff): return 0x000fffff
-        else: return round(temp)
-
-    '''
+    # TODO: add some more functionality...
 
     # Read data from the SPI bus
-    def read(self, address, data):
-        self.sendData(address, data)
-        readValue = sBoard.spi.readbytes(5)
-        value = readValue[1]
-        value = value << 8
-        value |= readValue[2]
-        value = value << 8
-        value |= readValue[3]
-        value = value << 8
-        value |= readValue[4]
-
-        return value
+    def read(self, address):
+        self.read40bit(address)
+        return self.read40bit(address)
 
     # Write data to the SPI bus
     def write(self, address, data):
         # For write, add 0x80 to address
         address = address | 0x80
         #print('0x{:02x}'.format(address))
-        self.sendData(address, data)
+        # self.sendData(address, data)
+
+        # Try different method instead of sendData()
+        sendBuf = [None] * 5
+        sendBuf[0] = address | 0x80
+        sendBuf[1] = 0xFF & (data >> 24)
+        sendBuf[2] = 0xFF & (data >> 16)
+        sendBuf[3] = 0xFF & (data >> 8)
+        sendBuf[4] = 0xFF & data
+
+        # Begin transmission by pulling CS pin low
+        gpio.output(self.chipSelect, gpio.LOW)
+
+        # Send datagram
+        response = sBoard.spi.writebytes(datagram)
+
+        # End transmission by pulling CS pin HIGH
+        gpio.output(self.chipSelect, gpio.HIGH)
 
     # Send data to the SPI bus
     def sendData(self, address, data):
@@ -418,51 +296,20 @@ class Motor(sBoard):
 
         return response[0]
 
-    ''' All these need to be updated
-    # set a parameter of the motor driver
-    def setParam(self, param, value):
-        self.xfer(LReg.SET_PARAM | param[0])
-        return self.paramHandler(param, value)
+    def read40bit(self, address):
+        # Clear write bit
+        addressBuf = [None] * 5
+        readBuf = [None] * 5
+        addressBuf[0] = address & 0x7F
 
-    # Get a parameter from the motor driver
-    def getParam(self, param):
-        self.xfer(LReg.GET_PARAM | param[0])
-        return self.paramHandler(param, 0)
+        readBuf = sBoard.spi.xfer2(addressBuf)
 
-    # Convert twos compliment
-    def convert(self, val):
-        if val > 0x400000/2:
-            val = val - 0x400000
-        return val
+        value = readBuf[1]
+        value = value << 8
+        value |= readBuf[2]
+        value = value << 8
+        value |= readBuf[3]
+        value = value << 8
+        value |= readBuf[4]
 
-    # Switch case to handle parameters
-    def paramHandler(self, param, value):
-        return self.param(value, param[1])
-
-    # Utility function
-    def param(self, value):
-        ret_value = 0
-
-        bit_len = 40
-
-        byte_len = bit_len/8
-        if (bit_len%8 > 0): byte_len +=1
-
-        mask = 0xffffffff >> (32 - bit_len)
-        if value > mask: value = mask
-
-        if byte_len >= 4.0:
-            temp = self.xfer(value >> 24)
-            ret_value |= temp << 24
-        if byte_len >= 3.0:
-            temp = self.xfer(value >> 16)
-            ret_value |= temp << 16
-        if byte_len >= 2.0:
-            temp = self.xfer(value >>8)
-            ret_value |= temp << 8
-        if byte_len >= 1.0:
-            temp = self.xfer(value)
-            ret_value |= temp
-
-        return (ret_value & mask)
-    '''
+        return value
