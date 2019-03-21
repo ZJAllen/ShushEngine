@@ -99,7 +99,7 @@ class Motor(sBoard):
         # self.sendData(address, data)
 
         # Try different method instead of sendData()
-        sendBuf = [None] * 5
+        sendBuf = [0] * 5
         print(sendBuf)
         sendBuf[0] = address | 0x80
         sendBuf[1] = 0xFF & (data >> 24)
@@ -156,8 +156,8 @@ class Motor(sBoard):
         return response[0]
 
     def read40bit(self, address):
-        addressBuf = [None] * 5
-        readBuf = [None] * 5
+        addressBuf = [0] * 5
+        readBuf = [0] * 5
 
         # Clear write bit
         addressBuf[0] = address & 0x7F
