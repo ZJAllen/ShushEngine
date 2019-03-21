@@ -83,7 +83,6 @@ class Motor(sBoard):
 
     # Move to an absolute position from Home (0) position
     def goTo(self, pos):
-        if pos > 0x3fffff: pos = 0x3fffff
         self.write(Register.XTARGET, pos)
 
     # Read data from the SPI bus
