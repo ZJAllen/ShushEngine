@@ -72,149 +72,8 @@ class Motor(sBoard):
         self.write(Register.XACTUAL, 0)
         self.write(Register.XTARGET, 0)
 
+    # TODO: add some more functionality...
 
-    ''' Need to update all this stuff
-    # initalise the appropriate pins and buses
-    def initPeripherals(self):
-
-        #check that the motors SPI is actually working
-        if (self.getParam(LReg.CONFIG) == 0x2e88):
-            print ("Motor Drive Connected on GPIO " + str(self.chipSelect))
-            self.boardInUse = 0
-        elif (self.getParam([0x1A, 16]) == 0x2c88):
-            print ("High Power Drive Connected on GPIO " + str(self.chipSelect))
-            self.boardInUse = 1
-        else:
-            print ("communication issues; check SPI configuration and cables")
-
-        #based on board type init driver accordingly
-        if self.boardInUse == 0:
-            self.setOverCurrent(2000)
-            self.setMicroSteps(16)
-            self.setCurrent(70, 90, 100, 100)
-            self.setParam([0x1A, 16], 0x3608)
-        if self.boardInUse == 1:
-            self.setParam([0x1A, 16], 0x3608)
-            self.setCurrent(100, 120, 140, 140)
-            self.setMicroSteps(16)
-
-        #self.setParam(LReg.KVAL_RUN, 0xff)
-        self.getStatus()
-        self.free()
-
-    # check if the motion engine is busy
-    def isBusy(self):
-        status = self.getStatus()
-        return (not ((status >> 1) & 0b1))
-
-    # wait for motor to finish moving *** Caution this is blocking ***
-    def waitMoveFinish(self):
-        status = 1
-        while status:
-            status = self.getStatus()
-            status = not((status >> 1) & 0b1)
-
-    # set the microstepping level
-    def setMicroSteps(self, microSteps):
-        self.free()
-        stepVal = 0
-
-        for stepVal in range(0, 8):
-            if microSteps == 1:
-                break
-            microSteps = microSteps >> 1;
-
-        self.setParam(LReg.STEP_MODE, (0x00 | stepVal | LReg.SYNC_SEL_1))
-
-    # set the threshold speed of the motor
-    def setThresholdSpeed(self, thresholdSpeed):
-        if thresholdSpeed == 0:
-            self.setParam(LReg.FS_SPD, 0x3ff)
-        else:
-            self.setParam(LReg.FS_SPD, self.fsCalc(thresholdSpeed))
-
-    # set the current
-    def setCurrent(self, hold, run, acc, dec):
-        self.setParam(LReg.KVAL_RUN, run)
-        self.setParam(LReg.KVAL_ACC, acc)
-        self.setParam(LReg.KVAL_DEC, dec)
-        self.setParam(LReg.KVAL_HOLD, hold)
-
-    # set the maximum motor speed
-    def setMaxSpeed(self, speed):
-        self.setParam(LReg.MAX_SPEED, self.maxSpdCalc(speed))
-
-    # set the minimum speed
-    def setMinSpeed(self, speed):
-        self.setParam(LReg.MIN_SPEED, self.minSpdCalc(speed))
-
-    # set accerleration rate
-    def setAccel(self, acceleration):
-        accelerationBytes = self.accCalc(acceleration)
-        self.setParam(LReg.ACC, accelerationBytes)
-
-    # set the deceleration rate
-    def setDecel(self, deceleration):
-        decelerationBytes = self.decCalc(deceleration)
-        self.setParam(LReg.DEC, decelerationBytes)
-
-
-
-    # get the speed of the motor
-    def getSpeed(self):
-        return self.getParam(LReg.SPEED)
-
-    # set the overcurrent threshold
-    def setOverCurrent(self, ma_current):
-        OCValue = math.floor(ma_current/375)
-        if OCValue > 0x0f: OCValue = 0x0f
-        self.setParam((LReg.OCD_TH), OCValue)
-
-    # set the stall current level
-    def setStallCurrent(self, ma_current):
-        STHValue = round(math.floor(ma_current/31.25))
-        if(STHValue > 0x80): STHValue = 0x80
-        if(STHValue < 0): STHValue = 9
-        self.setParam((LReg.STALL_TH), STHValue)
-
-    # set low speed optamization
-    def setLowSpeedOpt(self, enable):
-        self.xfer(LReg.SET_PARAM | LReg.MIN_SPEED[0])
-        if enable: self.param(0x1000, 13)
-        else: self.param(0, 13)
-
-    # start the motor spinning
-    def run(self, dir, spd):
-        speedVal = self.spdCalc(spd)
-        self.xfer(LReg.RUN | dir)
-        if speedVal > 0xfffff: speedVal = 0xfffff
-        self.xfer(speedVal >> 16)
-        self.xfer(speedVal >> 8)
-        self.xfer(speedVal)
-
-    # sets the clock source
-    def stepClock(self, dir):
-        self.xfer(LReg.STEP_CLOCK | dir)
-
-    # move the motor a number of steps
-    def move(self, nStep):
-        dir = 0
-
-        if nStep >= 0:
-            dir = LReg.FWD
-        else:
-            dir = LReg.REV
-
-        n_stepABS = abs(nStep)
-
-        self.xfer(LReg.MOVE | dir)
-        if n_stepABS > 0x3fffff: nStep = 0x3fffff
-        self.xfer(n_stepABS >> 16)
-        self.xfer(n_stepABS >> 8)
-        self.xfer(n_stepABS)
-
-
-    '''
     # Get the posistion of the motor
     def getPos(self):
         curPos = self.read(Register.XACTUAL)
@@ -226,8 +85,6 @@ class Motor(sBoard):
     def goTo(self, pos):
         if pos > 0x3fffff: pos = 0x3fffff
         self.write(Register.XTARGET, pos)
-
-    # TODO: add some more functionality...
 
     # Read data from the SPI bus
     def read(self, address):
@@ -243,17 +100,19 @@ class Motor(sBoard):
 
         # Try different method instead of sendData()
         sendBuf = [None] * 5
+        print(sendBuf)
         sendBuf[0] = address | 0x80
         sendBuf[1] = 0xFF & (data >> 24)
         sendBuf[2] = 0xFF & (data >> 16)
         sendBuf[3] = 0xFF & (data >> 8)
         sendBuf[4] = 0xFF & data
+        print(sendBuf)
 
         # Begin transmission by pulling CS pin low
         gpio.output(self.chipSelect, gpio.LOW)
 
         # Send datagram
-        response = sBoard.spi.writebytes(datagram)
+        response = sBoard.spi.writebytes(sendBuf)
 
         # End transmission by pulling CS pin HIGH
         gpio.output(self.chipSelect, gpio.HIGH)
@@ -297,9 +156,10 @@ class Motor(sBoard):
         return response[0]
 
     def read40bit(self, address):
-        # Clear write bit
         addressBuf = [None] * 5
         readBuf = [None] * 5
+
+        # Clear write bit
         addressBuf[0] = address & 0x7F
 
         readBuf = sBoard.spi.xfer2(addressBuf)
