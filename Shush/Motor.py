@@ -96,6 +96,7 @@ class Motor(Board):
 
         self.write(Register.XTARGET, pos)
 
+    # Calibrate home by driving motor to limit switch
     def calibrateHome(self, direction):
         '''
         Take direction as left or right, drive that direction until limit is hit,
@@ -139,6 +140,7 @@ class Motor(Board):
 
         sendData(writeBuf)
 
+    # Send data by pulling CS Low, transfer data array (write -> read), then pull CS High
     def sendData(self, dataArray):
 
         # Begin transmission by pulling CS pin low
