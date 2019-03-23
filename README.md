@@ -50,7 +50,6 @@ Below is a simple Python script to get the motor spinning. You can copy/paste th
 import Shush
 import time
 
-s = Shush.sBoard()
 m = Shush.Motor(0)
 
 # This function takes the target position as an input.
