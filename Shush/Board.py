@@ -3,7 +3,7 @@ __author__ = 'ZJAllen'
 import Shush.Boards.ShushEngine_MKI as SL1
 from Shush.Base import *
 
-class sBoard:
+class Board:
   chip = 0
   bus = 0
 
@@ -18,9 +18,6 @@ class sBoard:
     # Only applies to Raspberry Pi
 
     gpio.setmode(gpio.BCM)
-
-    # Common motor reset pin (needs to be set up)
-    # gpio.setup(SL1.L6470_Reset, gpio.OUT)
 
     # Define chip select pins
     gpio.setup(SL1.M0_CS, gpio.OUT)
@@ -49,19 +46,6 @@ class sBoard:
     #IO expander reset pin (does not yet exist)
     # gpio.setup(SL1.MCP23_Reset, gpio.OUT)
     # gpio.output(SL1.MCP23_Reset, gpio.HIGH)
-
-    #self.resetDrivers()
-
-  def resetDrivers(self):
-    # Reset all drivers
-    '''  NEEDS TO BE SET UP
-
-    gpio.output(SL1.TMC5160_Reset, gpio.LOW)
-    time.sleep(.01)
-    gpio.output(SL1.TMC5160_Reset, gpio.HIGH)
-    time.sleep(.01)
-
-    '''
 
   def initSPI(self):
     # Initialize SPI Bus for motor drivers

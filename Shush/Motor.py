@@ -4,7 +4,7 @@ from Shush.Board import *
 from Shush.Drivers import TMC5160_Registers as Register
 import math
 
-class Motor(sBoard):
+class Motor(Board):
 
     boardInUse = 0
 
@@ -30,16 +30,15 @@ class Motor(sBoard):
             self.chipSelect = SL1.M5_CS
             self.enablePin = SL1.M5_Enable
 
-        # Initialize the hardware
-        # self.initPeripherals()
+        # Initially set to default settings.  These can be changed and configured at any time.
         self.defaultSettings()
 
     def enableMotor(self):
-        # Pull all Enable pin LOW (pull HIGH to disable motor)
+        # Pull Enable pin LOW (pull HIGH to disable motor)
         gpio.output(self.enablePin, gpio.LOW)
 
     def disableMotor(self):
-        # Pull all Enable pin HIGH
+        # Pull Enable pin HIGH
         gpio.output(self.enablePin, gpio.HIGH)
 
     # Set default motor parameters
@@ -76,93 +75,44 @@ class Motor(sBoard):
 
     # Get the posistion of the motor
     def getPos(self):
-        curPos = self.read(Register.XACTUAL)
-        print("Current Pos: ", curPos)
+        currentPos = self.read(Register.XACTUAL)
+        print("Current Pos: ", currentPos)
 
-        return curPos
+        return currentPos
 
     # Move to an absolute position from Home (0) position
     def goTo(self, pos):
+        # Position range is from -2^31 to +(2^31)-1
+        maxPos = (2 *31) - 1
+        minPos = -(2**31)
+
+        # Check if position is within bounds
+        if pos > maxPos:
+            pos = maxPos
+            print("Maximum position reached! Stopped at max value.")
+        elif pos < minPos:
+            pos = minPos
+            print("Minimum position reached! Stopped at min value.")
+
         self.write(Register.XTARGET, pos)
+
+    def calibrateHome(self, direction):
+        '''
+        Take direction as left or right, drive that direction until limit is hit,
+        latch with XLATCH register, etc.  Ref. TMC5160 datasheet for procedure
+        '''
 
     # Read data from the SPI bus
     def read(self, address):
-        self.read40bit(address)
-        return self.read40bit(address)
-
-    # Write data to the SPI bus
-    def write(self, address, data):
-        # For write, add 0x80 to address
-        address = address | 0x80
-        #print('0x{:02x}'.format(address))
-        # self.sendData(address, data)
-
-        # Try different method instead of sendData()
-        sendBuf = [0] * 5
-        print(sendBuf)
-        sendBuf[0] = address | 0x80
-        sendBuf[1] = 0xFF & (data >> 24)
-        sendBuf[2] = 0xFF & (data >> 16)
-        sendBuf[3] = 0xFF & (data >> 8)
-        sendBuf[4] = 0xFF & data
-        print(sendBuf)
-
-        # Begin transmission by pulling CS pin low
-        gpio.output(self.chipSelect, gpio.LOW)
-
-        # Send datagram
-        response = sBoard.spi.writebytes(sendBuf)
-
-        # End transmission by pulling CS pin HIGH
-        gpio.output(self.chipSelect, gpio.HIGH)
-
-    # Send data to the SPI bus
-    def sendData(self, address, data):
-        # Initialize datagram variable
-        datagram = 0
-
-        # Delay 100 us
-        time.sleep(0.0001)
-
-        # Delay 10 us before sending data
-        time.sleep(0.00001)
-
-        datagram = [(address & 0xFF)]
-        datagram.append( (data >> 24) & 0xFF )
-        datagram.append( (data >> 16) & 0xFF )
-        datagram.append( (data >> 8) & 0xFF )
-        datagram.append( data & 0xFF )
-
-        # Begin transmission by pulling CS pin low
-        gpio.output(self.chipSelect, gpio.LOW)
-
-        # Send datagram
-        response = sBoard.spi.xfer2(datagram)
-
-        # End transmission by pulling CS pin HIGH
-        gpio.output(self.chipSelect, gpio.HIGH)
-
-        # return response
-
-    def xfer(self, data):
-
-        # Mask the value to a byte format for transmision
-        data = (int(data) & 0xff)
-
-        # Get response back from SPI transfer
-        response = sBoard.spi.xfer2([data])
-
-        return response[0]
-
-    def read40bit(self, address):
         addressBuf = [0] * 5
         readBuf = [0] * 5
 
         # Clear write bit
         addressBuf[0] = address & 0x7F
 
-        readBuf = sBoard.spi.xfer2(addressBuf)
+        readBuf = sendData(addressBuf)
 
+        # Parse data returned from SPI transfer/read
         value = readBuf[1]
         value = value << 8
         value |= readBuf[2]
@@ -172,3 +122,30 @@ class Motor(sBoard):
         value |= readBuf[4]
 
         return value
+
+    # Write data to the SPI bus
+    def write(self, address, data):
+        writeBuf = [0] * 5
+
+        # For write access, add 0x80 to address
+        writeBuf[0] = address | 0x80
+
+        writeBuf[1] = 0xFF & (data >> 24)
+        writeBuf[2] = 0xFF & (data >> 16)
+        writeBuf[3] = 0xFF & (data >> 8)
+        writeBuf[4] = 0xFF & data
+
+        sendData(writeBuf)
+
+    def sendData(self, dataArray):
+
+        # Begin transmission by pulling CS pin low
+        gpio.output(self.chipSelect, gpio.LOW)
+
+        # Send data
+        response = sBoard.spi.xfer2(dataArray)
+
+        # End transmission by pulling CS pin HIGH
+        gpio.output(self.chipSelect, gpio.HIGH)
+
+        return response
