@@ -104,13 +104,14 @@ class Motor(Board):
 
     # Read data from the SPI bus
     def read(self, address):
+        # Pre-populate data buffer with an empty array/list
         addressBuf = [0] * 5
         readBuf = [0] * 5
 
         # Clear write bit
         addressBuf[0] = address & 0x7F
 
-        readBuf = sendData(addressBuf)
+        readBuf = sendData(addressBuf)  # It will look like [address, 0, 0, 0, 0]
 
         # Parse data returned from SPI transfer/read
         value = readBuf[1]
@@ -125,6 +126,7 @@ class Motor(Board):
 
     # Write data to the SPI bus
     def write(self, address, data):
+        # Pre-populate data buffer with an empty array/list
         writeBuf = [0] * 5
 
         # For write access, add 0x80 to address
