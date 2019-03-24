@@ -3,6 +3,7 @@ __author__ = 'ZJAllen'
 from Shush.Board import *
 from Shush.Drivers import TMC5160_Registers as Register
 import math
+import time
 
 class Motor(Board):
 
@@ -67,11 +68,33 @@ class Motor(Board):
         self.write(Register.D1, 5000)
         self.write(Register.VSTOP, 10)
 
-        self.write(Register.RAMPMODE, 0)
-        self.write(Register.XACTUAL, 0)
-        self.write(Register.XTARGET, 0)
+        self.write(Register.RAMPMODE, 0)    # Position mode
+        self.write(Register.XACTUAL, 0)     # Set current position to 0
+        self.write(Register.XTARGET, 0)     # Set XTARGET to 0, which holds the motor at the current position
 
     # TODO: add some more functionality...
+
+    # Configure limit switch. See datasheet for limit switch config defaultSettings
+    def enableSwitch(self, direction):
+        # Initialize list
+        settingArray = [0] * 11
+
+        # en_softstop = 1
+        settingArray[1] = 0
+
+        if direction = "left":
+            settingArray[7] = 1     # latch_l_active = 1
+            settingArray[11] = 1    # stop_l_active = 1
+        elif direction = "right":
+            settingArray[5] = 1     # latch_r_active = 1
+            settingArray[10] = 1    # stop_r_active = 1
+        else:
+            print("Not a valid input! Please use ‘right’, or ‘left.")
+            error = True
+
+        if not error:
+            switchSettings = int("".join(settingArray))
+            self.write(Register.SWMODE, switchSettings)
 
     # Get the posistion of the motor
     def getPos(self):
@@ -79,6 +102,11 @@ class Motor(Board):
         print("Current Pos: ", currentPos)
 
         return currentPos
+
+    def getVel(self):
+        currentVel = self.read(Register.VACTUAL)
+
+        return currentVel
 
     # Move to an absolute position from Home (0) position
     def goTo(self, pos):
@@ -98,10 +126,84 @@ class Motor(Board):
 
     # Calibrate home by driving motor to limit switch
     def calibrateHome(self, direction):
-        '''
-        Take direction as left or right, drive that direction until limit is hit,
-        latch with XLATCH register, etc.  Ref. TMC5160 datasheet for procedure
-        '''
+        enableSwitch(direction)
+        ## TODO: add cases for left/right on direction input
+
+        # If the switch is active (pressed), move away from the switch until unactive
+        getRampStat()
+
+        if direction = "left":
+            while getRampStat.status_stop_l = 1:
+                # Move away from switch
+                moveVelocity("right")
+        elif direction =  "right":
+            while getRampStat.status_stop_r = 1:
+                # Move away from switch
+                moveVelocity("left")
+        else:
+            print("Command not processed!")
+            error = True
+
+        if not error:
+            moveVelocity(direction)
+
+            # Delay to let the motor ramp from 0 velocity
+            time.sleep(0.01)
+
+            if self.read(Register.VACTUAL) == 0:
+                # Engage hold mode
+                holdMode()
+
+                # Calcuate difference between latched position and actual position
+                actualPos = getPos()
+                latchedPos = self.read(Register.XLATCH)
+
+                posDifference = actualPos - latchedPos
+
+                # Write posDifference to XACTUAL to set home position
+                self.write(Register.XACTUAL, posDifference)
+
+                # Go to 0 position, which should be the exact position of switch activation
+                goTo(0)
+
+    # Drive movor in velocity mode, positive or negative
+    def moveVelocity(self, dir, vmax = 5000, amax = 5000):
+        self.write(Register.VMAX, vmax)
+        self.write(Register.AMAX, amax)
+        if dir = "left":
+            velMode = 2
+        elif dir = "right":
+            velMode = 3
+        else:
+            print("Not a valid input! Please use ‘right’, or ‘left.")
+            error = True
+
+        if not error:
+            self.write(Register.RAMPMODE, velMode)
+
+    def holdMode(self):
+        self.write(Register.RAMPMODE, 3)
+
+    def getRampStat(self):
+        rampStat = self.read(Register.RAMPSTAT)
+        rampStatBinary = "{0:014b}".format(rampstat)
+        rampStatArray = list(rampStatBinary)
+
+        # Parse response so individual registers can be referenced
+        getRampStat.status_sg           = rampStatArray[0]
+        getRampStat.second_move         = rampStatArray[1]
+        getRampStat.t_zerowait_active   = rampStatArray[2]
+        getRampStat.vzero               = rampStatArray[3]
+        getRampStat.position_reached    = rampStatArray[4]
+        getRampStat.velocity_reached    = rampStatArray[5]
+        getRampStat.event_pos_reached   = rampStatArray[6]
+        getRampStat.event_stop_sg       = rampStatArray[7]
+        getRampStat.event_stop_r        = rampStatArray[8]
+        getRampStat.event_stop_l        = rampStatArray[9]
+        getRampStat.status_latch_r      = rampStatArray[10]
+        getRampStat.status_latch_l      = rampStatArray[11]
+        getRampStat.status_stop_r       = rampStatArray[12]
+        getRampStat.status_stop_l       = rampStatArray[13]
 
     # Read data from the SPI bus
     def read(self, address):
