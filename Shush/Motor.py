@@ -77,23 +77,26 @@ class Motor(Board):
     # Configure limit switch. See datasheet for limit switch config defaultSettings
     def enableSwitch(self, direction):
         # Initialize list
-        settingArray = [0] * 11
+        settingArray = [0] * 12
 
         # en_softstop = 1
-        settingArray[1] = 0
+        settingArray[0] = 1
 
-        if direction = "left":
-            settingArray[7] = 1     # latch_l_active = 1
-            settingArray[11] = 1    # stop_l_active = 1
-        elif direction = "right":
-            settingArray[5] = 1     # latch_r_active = 1
-            settingArray[10] = 1    # stop_r_active = 1
+        if direction == "left":
+            settingArray[6] = 1     # latch_l_active = 1
+            settingArray[11] = 1    # stop_l_enable = 1
+            error = False
+        elif direction == "right":
+            settingArray[4] = 1     # latch_r_active = 1
+            settingArray[10] = 1    # stop_r_enable = 1
+            error = False
         else:
             print("Not a valid input! Please use ‘right’, or ‘left.")
             error = True
 
         if not error:
-            switchSettings = int("".join(settingArray))
+            switchSettings = int(''.join(str(i) for i in settingArray))
+            print("Switch settings bits: ", switchSettings)
             self.write(Register.SWMODE, switchSettings)
 
     # Get the posistion of the motor
@@ -110,8 +113,10 @@ class Motor(Board):
 
     # Move to an absolute position from Home (0) position
     def goTo(self, pos):
+        self.posMode()
+        
         # Position range is from -2^31 to +(2^31)-1
-        maxPos = (2 *31) - 1
+        maxPos = (2**31) - 1
         minPos = -(2**31)
 
         # Check if position is within bounds
@@ -126,35 +131,39 @@ class Motor(Board):
 
     # Calibrate home by driving motor to limit switch
     def calibrateHome(self, direction):
-        enableSwitch(direction)
+        self.enableSwitch(direction)
 
         # If the switch is active (pressed), move away from the switch until unactive
-        getRampStat()
+        self.getRampStat()
 
-        if direction = "left":
-            while getRampStat.status_stop_l = 1:
+        if direction == "left":
+            error = False
+            while self.getRampStat.status_stop_l == 1:
                 # Move away from switch
-                moveVelocity("right")
-        elif direction =  "right":
-            while getRampStat.status_stop_r = 1:
+                print("Left switch active!")
+                self.moveVelocity("right")
+        elif direction ==  "right":
+            error = False
+            while self.getRampStat.status_stop_r == 1:
                 # Move away from switch
-                moveVelocity("left")
+                print("Right switch active!")
+                self.moveVelocity("left")
         else:
             print("Command not processed!")
             error = True
 
         if not error:
-            moveVelocity(direction)
+            self.moveVelocity(direction)
 
             # Delay to let the motor ramp from 0 velocity
             time.sleep(0.01)
 
             if self.read(Register.VACTUAL) == 0:
                 # Engage hold mode
-                holdMode()
+                self.holdMode()
 
                 # Calcuate difference between latched position and actual position
-                actualPos = getPos()
+                actualPos = self.getPos()
                 latchedPos = self.read(Register.XLATCH)
 
                 posDifference = actualPos - latchedPos
@@ -163,18 +172,20 @@ class Motor(Board):
                 self.write(Register.XACTUAL, posDifference)
 
                 # Go to 0 position, which should be the exact position of switch activation
-                goTo(0)
+                self.goTo(0)
 
     # Drive movor in velocity mode, positive or negative
-    def moveVelocity(self, dir, vmax = 5000, amax = 5000):
+    def moveVelocity(self, dir, vmax = 500000, amax = 50000):
         self.write(Register.VMAX, vmax)
         self.write(Register.AMAX, amax)
-        if dir = "left":
+        if dir == "left":
+            velMode = 1
+            error = False
+        elif dir == "right":
             velMode = 2
-        elif dir = "right":
-            velMode = 3
+            error = False
         else:
-            print("Not a valid input! Please use ‘right’, or ‘left.")
+            print("Not a valid input! Please use 'right', or 'left'.")
             error = True
 
         if not error:
@@ -182,27 +193,32 @@ class Motor(Board):
 
     def holdMode(self):
         self.write(Register.RAMPMODE, 3)
+        
+    def posMode(self):
+        self.write(Register.RAMPMODE, 0)
 
     def getRampStat(self):
+        self.read(Register.RAMPSTAT)
         rampStat = self.read(Register.RAMPSTAT)
-        rampStatBinary = "{0:014b}".format(rampstat)
+        rampStatBinary = "{0:014b}".format(rampStat)
         rampStatArray = list(rampStatBinary)
 
         # Parse response so individual registers can be referenced
-        getRampStat.status_sg           = rampStatArray[0]
-        getRampStat.second_move         = rampStatArray[1]
-        getRampStat.t_zerowait_active   = rampStatArray[2]
-        getRampStat.vzero               = rampStatArray[3]
-        getRampStat.position_reached    = rampStatArray[4]
-        getRampStat.velocity_reached    = rampStatArray[5]
-        getRampStat.event_pos_reached   = rampStatArray[6]
-        getRampStat.event_stop_sg       = rampStatArray[7]
-        getRampStat.event_stop_r        = rampStatArray[8]
-        getRampStat.event_stop_l        = rampStatArray[9]
-        getRampStat.status_latch_r      = rampStatArray[10]
-        getRampStat.status_latch_l      = rampStatArray[11]
-        getRampStat.status_stop_r       = rampStatArray[12]
-        getRampStat.status_stop_l       = rampStatArray[13]
+        Motor.getRampStat.status_sg = rampStatArray[0]
+        Motor.getRampStat.second_move = rampStatArray[1]
+        Motor.getRampStat.t_zerowait_active = rampStatArray[2]
+        Motor.getRampStat.vzero = rampStatArray[3]
+        Motor.getRampStat.position_reached = rampStatArray[4]
+        Motor.getRampStat.velocity_reached = rampStatArray[5]
+        Motor.getRampStat.event_pos_reached = rampStatArray[6]
+        Motor.getRampStat.event_stop_sg = rampStatArray[7]
+        Motor.getRampStat.event_stop_r = rampStatArray[8]
+        Motor.getRampStat.event_stop_l = rampStatArray[9]
+        Motor.getRampStat.status_latch_r = rampStatArray[10]
+        Motor.getRampStat.status_latch_l = rampStatArray[11]
+        Motor.getRampStat.status_stop_r = rampStatArray[12]
+        Motor.getRampStat.status_stop_l = rampStatArray[13]
+        print("Ramp Stat: ", rampStatBinary)
 
     # Read data from the SPI bus
     def read(self, address):
@@ -213,7 +229,7 @@ class Motor(Board):
         # Clear write bit
         addressBuf[0] = address & 0x7F
 
-        readBuf = sendData(addressBuf)  # It will look like [address, 0, 0, 0, 0]
+        readBuf = self.sendData(addressBuf)  # It will look like [address, 0, 0, 0, 0]
 
         # Parse data returned from SPI transfer/read
         value = readBuf[1]
@@ -239,8 +255,8 @@ class Motor(Board):
         writeBuf[3] = 0xFF & (data >> 8)
         writeBuf[4] = 0xFF & data
 
-        sendData(writeBuf)
-
+        response = self.sendData(writeBuf)
+        
     # Send data by pulling CS Low, transfer data array (write -> read), then pull CS High
     def sendData(self, dataArray):
 
@@ -248,7 +264,7 @@ class Motor(Board):
         gpio.output(self.chipSelect, gpio.LOW)
 
         # Send data
-        response = sBoard.spi.xfer2(dataArray)
+        response = Board.spi.xfer2(dataArray)
 
         # End transmission by pulling CS pin HIGH
         gpio.output(self.chipSelect, gpio.HIGH)
