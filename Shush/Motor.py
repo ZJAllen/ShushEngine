@@ -127,7 +127,6 @@ class Motor(Board):
     # Calibrate home by driving motor to limit switch
     def calibrateHome(self, direction):
         enableSwitch(direction)
-        ## TODO: add cases for left/right on direction input
 
         # If the switch is active (pressed), move away from the switch until unactive
         getRampStat()
