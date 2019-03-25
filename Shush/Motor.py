@@ -50,23 +50,25 @@ class Motor(Board):
         # TOFF = 3, HSTRT = 4, HEND = 1, TBL = 2, CHM = 0 (spreadCycle)
         self.write(Register.CHOPCONF, 0x000100C3)
 
-        # IHOLD = 8, IRUN = 15 (max current), IHOLDDELAY = 6
-        self.write(Register.IHOLD_IRUN, 0x00080F0A)
+        # IHOLD = 2, IRUN = 15 (max current), IHOLDDELAY = 8
+        self.write(Register.IHOLD_IRUN, 0x00080F02)
 
         # TPOWERDOWN = 10: Delay before powerdown in standstill
         self.write(Register.TPOWERDOWN, 0x0000000A)
 
         #TPWMTHRS = 500
         self.write(Register.TPWMTHRS, 0x000001F4)
-
-        self.write(Register.VSTART, 1)
-        self.write(Register.A1, 50000)
-        self.write(Register.V1, 50000)
-        self.write(Register.AMAX, 500000)
-        self.write(Register.VMAX, 5000000)
-        self.write(Register.DMAX, 50000)
-        self.write(Register.D1, 5000)
-        self.write(Register.VSTOP, 10)
+        
+        #
+        self.writeRampParams()
+        #self.write(Register.VSTART, 1)
+        #self.write(Register.A1, 50000)
+        #self.write(Register.V1, 50000)
+        #self.write(Register.AMAX, 50000)
+        #self.write(Register.VMAX, 500000)
+        #self.write(Register.DMAX, 100000)
+        #self.write(Register.D1, 5000)
+        #self.write(Register.VSTOP, 10)
 
         self.write(Register.RAMPMODE, 0)    # Position mode
         self.write(Register.XACTUAL, 0)     # Set current position to 0
@@ -74,6 +76,28 @@ class Motor(Board):
 
     # TODO: add some more functionality...
 
+    def setRampParams(self, VSTART = 1, A1 = 25000, V1 = 250000, AMAX = 50000, VMAX = 500000, DMAX = 50000, D1 = 50000, VSTOP = 10):
+        Motor.setRampParams.VSTART = VSTART
+        Motor.setRampParams.A1 = A1
+        Motor.setRampParams.V1 = V1
+        Motor.setRampParams.AMAX = AMAX
+        Motor.setRampParams.VMAX = VMAX
+        Motor.setRampParams.DMAX = DMAX
+        Motor.setRampParams.D1 = D1
+        Motor.setRampParams.VSTOP = VSTOP
+        
+    def writeRampParams(self):
+        self.setRampParams()
+        
+        self.write(Register.VSTART, self.setRampParams.VSTART)
+        self.write(Register.A1, self.setRampParams.A1)
+        self.write(Register.V1, self.setRampParams.V1)
+        self.write(Register.AMAX, self.setRampParams.AMAX)
+        self.write(Register.VMAX, self.setRampParams.VMAX)
+        self.write(Register.DMAX, self.setRampParams.DMAX)
+        self.write(Register.D1, self.setRampParams.D1)
+        self.write(Register.VSTOP, self.setRampParams.VSTOP)
+    
     # Configure limit switch. See datasheet for limit switch config defaultSettings
     def enableSwitch(self, direction):
         # Initialize list
@@ -82,11 +106,11 @@ class Motor(Board):
         # en_softstop = 1
         settingArray[0] = 1
 
-        if direction == "left":
+        if direction == 'left':
             settingArray[6] = 1     # latch_l_active = 1
             settingArray[11] = 1    # stop_l_enable = 1
             error = False
-        elif direction == "right":
+        elif direction == 'right':
             settingArray[4] = 1     # latch_r_active = 1
             settingArray[10] = 1    # stop_r_enable = 1
             error = False
@@ -95,19 +119,35 @@ class Motor(Board):
             error = True
 
         if not error:
-            switchSettings = int(''.join(str(i) for i in settingArray))
-            print("Switch settings bits: ", switchSettings)
+            # Create binary string, so it can be correctly processed and sent over SPI
+            switchSettings = int(''.join(str(i) for i in settingArray), 2)
             self.write(Register.SWMODE, switchSettings)
 
     # Get the posistion of the motor
-    def getPos(self):
+    def getPosSigned(self):
         currentPos = self.read(Register.XACTUAL)
-        print("Current Pos: ", currentPos)
+        
+        # Convert 2's complement to get signed number
+        currentPos = self.twosComp(currentPos) 
+        
+        #print("Current Pos: ", currentPos)
 
         return currentPos
+        
+    def getLatchSigned(self):
+        latchedPos = self.read(Register.XLATCH)
+        
+        # Convert 2's complement to get signed number
+        latchedPos = self.twosComp(latchedPos)
+        
+        return latchedPos
 
-    def getVel(self):
+    def getVelSigned(self):
         currentVel = self.read(Register.VACTUAL)
+        
+        # Convert 2's complement to get signed number
+        # VACTUAL is valid for +-(2^23)-1, so 24 bits
+        currentVel = self.twosComp(currentVel, 24)  # 24 bits optional argument
 
         return currentVel
 
@@ -130,58 +170,90 @@ class Motor(Board):
         self.write(Register.XTARGET, pos)
 
     # Calibrate home by driving motor to limit switch
+    ## Position-based rather than velocity based
     def calibrateHome(self, direction):
         self.enableSwitch(direction)
 
         # If the switch is active (pressed), move away from the switch until unactive
         self.getRampStat()
-
-        if direction == "left":
+        
+        switchPressed = int(self.getRampStat.status_stop_l)
+        
+        if direction == 'left':
             error = False
-            while self.getRampStat.status_stop_l == 1:
+            
+            switchPressed = int(self.getRampStat.status_stop_l)
+            
+            if switchPressed == 1:
+                
                 # Move away from switch
-                print("Left switch active!")
-                self.moveVelocity("right")
-        elif direction ==  "right":
+                self.goTo(512000)
+                
+                while switchPressed == 1:
+                    self.getRampStat()
+                    switchPressed = int(self.getRampStat.status_stop_l)
+        
+        elif direction ==  'right':
             error = False
-            while self.getRampStat.status_stop_r == 1:
+            
+            switchPressed = int(self.getRampStat.status_stop_r)
+            
+            if switchPressed == 1:
+                
                 # Move away from switch
-                print("Right switch active!")
-                self.moveVelocity("left")
+                self.goTo(-512000)
+                
+                while switchPressed == 1:
+                    self.getRampStat()
+                    switchPressed = int(self.getRampStat.status_stop_r)
+                    
         else:
             print("Command not processed!")
             error = True
 
         if not error:
-            self.moveVelocity(direction)
+            self.goTo(-2560000)
 
-            # Delay to let the motor ramp from 0 velocity
-            time.sleep(0.01)
+            # Delay to let the motor ramp from standstill
+            time.sleep(0.1)
 
-            if self.read(Register.VACTUAL) == 0:
-                # Engage hold mode
-                self.holdMode()
+            # Poll VACTUAL until it is 0
+            velActual = self.getVelSigned()
+            
+            while velActual != 0:
+                #time.sleep(0.001)
+                velActual = self.getVelSigned()
+                #print("Velocity: ", velActual)
+            
+            # Engage hold mode
+            self.holdMode()
+            
+            # Calcuate difference between latched position and actual position
+            actualPos = self.getPosSigned()
+            latchedPos = self.getLatchSigned()
 
-                # Calcuate difference between latched position and actual position
-                actualPos = self.getPos()
-                latchedPos = self.read(Register.XLATCH)
+            posDifference = actualPos - latchedPos
 
-                posDifference = actualPos - latchedPos
-
-                # Write posDifference to XACTUAL to set home position
-                self.write(Register.XACTUAL, posDifference)
-
-                # Go to 0 position, which should be the exact position of switch activation
-                self.goTo(0)
+            # Write posDifference to XACTUAL to set home position
+            self.write(Register.XACTUAL, posDifference)
+            
+            # Clear status_latch_l
+            self.write(Register.RAMPSTAT,4)
+            
+            # Go to 0 position, which should be the exact position of switch activation
+            self.goTo(0)
+            
+            print("Homing complete!")
+            
 
     # Drive movor in velocity mode, positive or negative
     def moveVelocity(self, dir, vmax = 500000, amax = 50000):
         self.write(Register.VMAX, vmax)
         self.write(Register.AMAX, amax)
-        if dir == "left":
+        if dir == 'left':
             velMode = 1
             error = False
-        elif dir == "right":
+        elif dir == 'right':
             velMode = 2
             error = False
         else:
@@ -204,21 +276,21 @@ class Motor(Board):
         rampStatArray = list(rampStatBinary)
 
         # Parse response so individual registers can be referenced
-        Motor.getRampStat.status_sg = rampStatArray[0]
-        Motor.getRampStat.second_move = rampStatArray[1]
+        Motor.getRampStat.status_sg         = rampStatArray[0]
+        Motor.getRampStat.second_move       = rampStatArray[1]
         Motor.getRampStat.t_zerowait_active = rampStatArray[2]
-        Motor.getRampStat.vzero = rampStatArray[3]
-        Motor.getRampStat.position_reached = rampStatArray[4]
-        Motor.getRampStat.velocity_reached = rampStatArray[5]
+        Motor.getRampStat.vzero             = rampStatArray[3]
+        Motor.getRampStat.position_reached  = rampStatArray[4]
+        Motor.getRampStat.velocity_reached  = rampStatArray[5]
         Motor.getRampStat.event_pos_reached = rampStatArray[6]
-        Motor.getRampStat.event_stop_sg = rampStatArray[7]
-        Motor.getRampStat.event_stop_r = rampStatArray[8]
-        Motor.getRampStat.event_stop_l = rampStatArray[9]
-        Motor.getRampStat.status_latch_r = rampStatArray[10]
-        Motor.getRampStat.status_latch_l = rampStatArray[11]
-        Motor.getRampStat.status_stop_r = rampStatArray[12]
-        Motor.getRampStat.status_stop_l = rampStatArray[13]
-        print("Ramp Stat: ", rampStatBinary)
+        Motor.getRampStat.event_stop_sg     = rampStatArray[7]
+        Motor.getRampStat.event_stop_r      = rampStatArray[8]
+        Motor.getRampStat.event_stop_l      = rampStatArray[9]
+        Motor.getRampStat.status_latch_r    = rampStatArray[10]
+        Motor.getRampStat.status_latch_l    = rampStatArray[11]
+        Motor.getRampStat.status_stop_r     = rampStatArray[12]
+        Motor.getRampStat.status_stop_l     = rampStatArray[13]
+        #print("Ramp Stat: ", rampStatBinary)
 
     # Read data from the SPI bus
     def read(self, address):
@@ -228,7 +300,8 @@ class Motor(Board):
 
         # Clear write bit
         addressBuf[0] = address & 0x7F
-
+        
+        self.sendData(addressBuf)
         readBuf = self.sendData(addressBuf)  # It will look like [address, 0, 0, 0, 0]
 
         # Parse data returned from SPI transfer/read
@@ -270,3 +343,11 @@ class Motor(Board):
         gpio.output(self.chipSelect, gpio.HIGH)
 
         return response
+        
+    def twosComp(self, value, bits = 32):
+        if (value & (1 << (bits - 1))) != 0:
+            signedValue = value - (1 << bits)
+        else:
+            signedValue = value
+            
+        return signedValue
