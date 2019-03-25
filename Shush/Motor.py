@@ -58,17 +58,8 @@ class Motor(Board):
 
         #TPWMTHRS = 500
         self.write(Register.TPWMTHRS, 0x000001F4)
-        
-        #
+
         self.writeRampParams()
-        #self.write(Register.VSTART, 1)
-        #self.write(Register.A1, 50000)
-        #self.write(Register.V1, 50000)
-        #self.write(Register.AMAX, 50000)
-        #self.write(Register.VMAX, 500000)
-        #self.write(Register.DMAX, 100000)
-        #self.write(Register.D1, 5000)
-        #self.write(Register.VSTOP, 10)
 
         self.write(Register.RAMPMODE, 0)    # Position mode
         self.write(Register.XACTUAL, 0)     # Set current position to 0
@@ -85,10 +76,10 @@ class Motor(Board):
         Motor.setRampParams.DMAX = DMAX
         Motor.setRampParams.D1 = D1
         Motor.setRampParams.VSTOP = VSTOP
-        
+
     def writeRampParams(self):
         self.setRampParams()
-        
+
         self.write(Register.VSTART, self.setRampParams.VSTART)
         self.write(Register.A1, self.setRampParams.A1)
         self.write(Register.V1, self.setRampParams.V1)
@@ -97,7 +88,7 @@ class Motor(Board):
         self.write(Register.DMAX, self.setRampParams.DMAX)
         self.write(Register.D1, self.setRampParams.D1)
         self.write(Register.VSTOP, self.setRampParams.VSTOP)
-    
+
     # Configure limit switch. See datasheet for limit switch config defaultSettings
     def enableSwitch(self, direction):
         # Initialize list
@@ -126,25 +117,25 @@ class Motor(Board):
     # Get the posistion of the motor
     def getPosSigned(self):
         currentPos = self.read(Register.XACTUAL)
-        
+
         # Convert 2's complement to get signed number
-        currentPos = self.twosComp(currentPos) 
-        
+        currentPos = self.twosComp(currentPos)
+
         #print("Current Pos: ", currentPos)
 
         return currentPos
-        
+
     def getLatchSigned(self):
         latchedPos = self.read(Register.XLATCH)
-        
+
         # Convert 2's complement to get signed number
         latchedPos = self.twosComp(latchedPos)
-        
+
         return latchedPos
 
     def getVelSigned(self):
         currentVel = self.read(Register.VACTUAL)
-        
+
         # Convert 2's complement to get signed number
         # VACTUAL is valid for +-(2^23)-1, so 24 bits
         currentVel = self.twosComp(currentVel, 24)  # 24 bits optional argument
@@ -154,7 +145,7 @@ class Motor(Board):
     # Move to an absolute position from Home (0) position
     def goTo(self, pos):
         self.posMode()
-        
+
         # Position range is from -2^31 to +(2^31)-1
         maxPos = (2**31) - 1
         minPos = -(2**31)
@@ -176,37 +167,37 @@ class Motor(Board):
 
         # If the switch is active (pressed), move away from the switch until unactive
         self.getRampStat()
-        
+
         switchPressed = int(self.getRampStat.status_stop_l)
-        
+
         if direction == 'left':
             error = False
-            
+
             switchPressed = int(self.getRampStat.status_stop_l)
-            
+
             if switchPressed == 1:
-                
+
                 # Move away from switch
                 self.goTo(512000)
-                
+
                 while switchPressed == 1:
                     self.getRampStat()
                     switchPressed = int(self.getRampStat.status_stop_l)
-        
+
         elif direction ==  'right':
             error = False
-            
+
             switchPressed = int(self.getRampStat.status_stop_r)
-            
+
             if switchPressed == 1:
-                
+
                 # Move away from switch
                 self.goTo(-512000)
-                
+
                 while switchPressed == 1:
                     self.getRampStat()
                     switchPressed = int(self.getRampStat.status_stop_r)
-                    
+
         else:
             print("Command not processed!")
             error = True
@@ -219,15 +210,15 @@ class Motor(Board):
 
             # Poll VACTUAL until it is 0
             velActual = self.getVelSigned()
-            
+
             while velActual != 0:
                 #time.sleep(0.001)
                 velActual = self.getVelSigned()
                 #print("Velocity: ", velActual)
-            
+
             # Engage hold mode
             self.holdMode()
-            
+
             # Calcuate difference between latched position and actual position
             actualPos = self.getPosSigned()
             latchedPos = self.getLatchSigned()
@@ -236,15 +227,15 @@ class Motor(Board):
 
             # Write posDifference to XACTUAL to set home position
             self.write(Register.XACTUAL, posDifference)
-            
+
             # Clear status_latch_l
             self.write(Register.RAMPSTAT,4)
-            
+
             # Go to 0 position, which should be the exact position of switch activation
             self.goTo(0)
-            
+
             print("Homing complete!")
-            
+
 
     # Drive movor in velocity mode, positive or negative
     def moveVelocity(self, dir, vmax = 500000, amax = 50000):
@@ -265,7 +256,7 @@ class Motor(Board):
 
     def holdMode(self):
         self.write(Register.RAMPMODE, 3)
-        
+
     def posMode(self):
         self.write(Register.RAMPMODE, 0)
 
@@ -300,7 +291,7 @@ class Motor(Board):
 
         # Clear write bit
         addressBuf[0] = address & 0x7F
-        
+
         self.sendData(addressBuf)
         readBuf = self.sendData(addressBuf)  # It will look like [address, 0, 0, 0, 0]
 
@@ -329,7 +320,7 @@ class Motor(Board):
         writeBuf[4] = 0xFF & data
 
         response = self.sendData(writeBuf)
-        
+
     # Send data by pulling CS Low, transfer data array (write -> read), then pull CS High
     def sendData(self, dataArray):
 
@@ -343,11 +334,11 @@ class Motor(Board):
         gpio.output(self.chipSelect, gpio.HIGH)
 
         return response
-        
+
     def twosComp(self, value, bits = 32):
         if (value & (1 << (bits - 1))) != 0:
             signedValue = value - (1 << bits)
         else:
             signedValue = value
-            
+
         return signedValue
