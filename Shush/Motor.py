@@ -66,7 +66,10 @@ class Motor(Board):
         self.write(Register.XTARGET, 0)     # Set XTARGET to 0, which holds the motor at the current position
 
     # TODO: add some more functionality...
-
+    ## Add stallGuard + coolStep (datasheet page 52)
+    
+    # Set parameters for position ramp generator
+    # If needed, modify these before using self.goTo() or other positioning
     def setRampParams(self, VSTART = 1, A1 = 25000, V1 = 250000, AMAX = 50000, VMAX = 500000, DMAX = 50000, D1 = 50000, VSTOP = 10):
         Motor.setRampParams.VSTART = VSTART
         Motor.setRampParams.A1 = A1
@@ -76,7 +79,8 @@ class Motor(Board):
         Motor.setRampParams.DMAX = DMAX
         Motor.setRampParams.D1 = D1
         Motor.setRampParams.VSTOP = VSTOP
-
+    
+    # Gets values from setRampParams() and writes them to the appropriate registers
     def writeRampParams(self):
         self.setRampParams()
 
