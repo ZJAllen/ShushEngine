@@ -62,7 +62,6 @@ def spin(target):
   i = 0
 
   while m.getPosSigned() != target:
-    # The getPos() function prints the current position
     print(m.getPosSigned())
     print(i)
     i += 1
