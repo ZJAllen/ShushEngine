@@ -84,6 +84,8 @@ This library is being populated with various functionality to drive stepper moto
 
 The following examples assume you have assigned the Motor object to the variable `m` as in `m = Shush.Motor(0)`, where the argument for Motor() is the identifier for the specific stepper motor.  If you have up to six stepper motors, for example, you can denote them by `m0 = Shush.Motor(0)`, `m1 = Shush.Motor(1)`, and so on.
 
+---
+
 ### Go To Position
 
 The `goTo()` method takes a target position as the input argument, and the driver internals drive the motor to that position according to the set ramp parameters.  The target position is number of microsteps.  The default is 256 microsteps per full stepper motor step.  Most common stepper motors move 1.8 degrees per step, or 200 steps per full revolution.  So to go a full rotation, the target would be +/- 51200 microsteps.
@@ -101,6 +103,8 @@ m.goTo(position)
 #### Return:
 
 None
+
+---
 
 ### Get Position
 
