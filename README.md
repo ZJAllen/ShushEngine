@@ -154,7 +154,7 @@ There is no return value for writes by default, so if you need a response from a
 #### Synatax:
 
 ``` python
-m.write(Motor.Register.XTARGET,5000)
+m.write(Motor.Register.XTARGET, 5000)
 ```
 
 #### Return:
