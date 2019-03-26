@@ -122,7 +122,7 @@ currentPos = m.getPosSigned()
 
 #### Return:
 
-Signed position of motor `[int]`
+Signed position of motor [int]
 
 
 # License
