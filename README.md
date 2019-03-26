@@ -78,7 +78,7 @@ Save this anywhere you’d like, on your Desktop for example. We’ll call it Sh
 
 Now, you can call the script by typing `python3 ShushExample.py` and the motor should start spinning.
 
-## Motor Driver functionality
+## Motor Driver Functionality
 
 This library is being populated with various functionality to drive stepper motors with ease.  Please check back to this list as the library is developed.
 
@@ -88,7 +88,7 @@ The following examples assume you have assigned the Motor object to the variable
 
 The `goTo()` method takes a target position as the input argument, and the driver internals drive the motor to that position according to the set ramp parameters.  The target position is number of microsteps.  The default is 256 microsteps per full stepper motor step.  Most common stepper motors move 1.8 degrees per step, or 200 steps per full revolution.  So to go a full rotation, the target would be +/- 51200 microsteps.
 
-The position can be a signed (positive or negative) number.  The most negative number is -2^31, or -2,147,483,648, and the most positive number is 2^31 - 1, or 2,147,483,647.
+The position can be a signed (positive or negative) number.  The most negative number is (-2^31), or -2,147,483,648, and the most positive number is (2^31 - 1), or 2,147,483,647.
 
 To put this range in perspective, if you set the position to the max or min value, it would spin +/- 41,943 **full rotations** from the 0 position.
 
@@ -101,6 +101,25 @@ m.goTo(position)
 #### Return:
 
 None
+
+### Get Position
+
+The `getPosSigned()` method retrieves the current position of the motor.  This method doesn't take any input arguments.
+
+As described in the `goTo()` method, the position can be -(2^31) to +(2^31 - 1), so the position read from the register is also signed.
+
+This method can be called during a motion to poll the position in real time.
+
+#### Syntax:
+
+``` python
+currentPos = m.getPosSigned()
+```
+
+#### Return:
+
+Signed position of motor `[int]`
+
 
 # License
 
