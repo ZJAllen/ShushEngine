@@ -136,7 +136,7 @@ The returned value is, by default, an integer, but it can be parsed into binary 
 #### Synatax:
 
 ``` python
-dataFromDriver = m.read(Motor.Register.XACTUAL)
+actualPosition = m.read(Motor.Register.XACTUAL)
 ```
 
 #### Return:
