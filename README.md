@@ -81,7 +81,7 @@ Now, you can call the script by typing `python3 ShushExample.py` and the motor s
 
 This library is being populated with various functionality to drive stepper motors with ease.  Please check back to this list as the library is developed.
 
-The following examples assume you have assigned the Motor object to the variable `m` as in `m = Shush.Motor(0)`, where the argument for Motor() is the identifier for the specific stepper motor.  If you have up to six stepper motors, for example, you can denote them by `m0 = Shush.Motor(0)`, `m1 = Shush.Motor(1)`, ..., `m5 = Shush.Motor(0)`.
+The following examples assume you have assigned the Motor object to the variable `m` as in `m = Shush.Motor(0)`, where the argument for Motor() is the identifier for the specific stepper motor.  If you have up to six stepper motors, for example, you can denote them by `m0 = Shush.Motor(0)`, `m1 = Shush.Motor(1)`, ..., `m5 = Shush.Motor(5)`.
 
 ---
 
