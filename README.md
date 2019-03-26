@@ -129,7 +129,7 @@ Signed position of motor [int]
 
 ### Read Data in Register
 
-The `read()` method gets data from a particular register in the driver.  It takes only the register as the input argument, and it returns the value.
+The `read()` method gets data from a particular register in the driver.  It takes only the register address as the input argument, and it returns the value.
 
 The returned value is, by default, an integer, but it can be parsed into binary or hex depending on your needs.
 
@@ -141,7 +141,25 @@ dataFromDriver = m.read(Motor.Register.XACTUAL)
 
 #### Return:
 
-Data read from SPI read operation [int]
+Data received from SPI read operation [int]
+
+---
+
+### Write Data to Register
+
+The `write()` method sends data to a particular register in the driver.  It takes the register address and the data to be sent as the input arguments.  Since the register addresses in the datasheet are in hex, it is easy to send the address as hex.  The data can be sent as an int, as hex, or as binary.  The data representation for the *data* will vary for different registers.  Per the datasheet, for write access, 0x80 is added to the register address provided.  This is done internally by the method.
+
+There is no return value for writes by default, so if you need a response from a particular register, please also use the `read()` method.
+
+#### Synatax:
+
+``` python
+m.write(Motor.Register.XTARGET,5000)
+```
+
+#### Return:
+
+None
 
 # License
 
