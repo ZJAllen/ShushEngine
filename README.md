@@ -2,7 +2,9 @@
 
 The Python stepper motor driver for Trinamic's TMC5160 motion controller chip.
 
-Built from [Roboteurs](https://roboteurs.com/)'s project [SlushEngine](https://github.com/Roboteurs/slushengine)
+This project is based on the @Roboteurs project [SlushEngine](https://github.com/Roboteurs/slushengine).  More details and their products can be found on their [website](https://roboteurs.com/).
+
+Since this project uses Trinamic's famed *silent* stepper drivers and is based on the SlushEngine project, it's being called the ShushEngine.
 
 This project is made for the Raspberry Pi only at this time.
 
@@ -105,7 +107,7 @@ None
 
 ---
 
-### Get Position
+### Get Current Position
 
 The `getPosSigned()` method retrieves the current position of the motor.  This method doesn't take any input arguments.
 
@@ -123,6 +125,23 @@ currentPos = m.getPosSigned()
 
 Signed position of motor [int]
 
+---
+
+### Read Data in Register
+
+The `read()` method gets data from a particular register in the driver.  It takes only the register as the input argument, and it returns the value.
+
+The returned value is, by default, an integer, but it can be parsed into binary or hex depending on your needs.
+
+#### Synatax:
+
+``` python
+dataFromDriver = m.read(Motor.Register.*register*)
+```
+
+#### Return:
+
+Data read from SPI read operation [int]
 
 # License
 
