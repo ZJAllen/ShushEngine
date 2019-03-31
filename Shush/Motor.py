@@ -110,7 +110,7 @@ class Motor(Board):
             settingArray[10] = 1    # stop_r_enable = 1
             error = False
         else:
-            print("Not a valid input! Please use ‘right’, or ‘left.")
+            print("Not a valid input! Please use 'right', or 'left'.")
             error = True
 
         if not error:
