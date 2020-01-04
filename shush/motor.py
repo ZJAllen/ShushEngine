@@ -270,6 +270,12 @@ class Motor(Board):
         if not error:
             self.write(reg.RAMPMODE, velocity_mode)
 
+    def stop_motor(self):
+        # Stop all motion. Keep motor enabled.
+
+        self.move_velocity(1, v_max=0)
+        self.hold_mode()
+
     def hold_mode(self):
         self.write(reg.RAMPMODE, 3)
 
