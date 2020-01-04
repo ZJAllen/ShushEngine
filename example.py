@@ -3,7 +3,7 @@ import time
 
 s = Shush.Board()
 m = Shush.Motor(0)
-m.enableMotor()
+m.enable_motor()
 
 
 # This function takes the target position as an input.
@@ -11,12 +11,12 @@ m.enableMotor()
 # The motor spins until it gets to the target position
 # before allowing the next command.
 def spin(target):
-    m.goTo(target)
+    m.go_to(target)
 
     i = 0
 
-    while m.getPosSigned() != target:
-        print(m.getPosSigned())
+    while m.get_position() != target:
+        print(m.get_position())
         print(i)
         i += 1
 

@@ -1,4 +1,4 @@
 __author__ = 'ZJAllen'
 
-from Shush import *
-from Shush.Boards.ShushEngine_MKI import *
+from shush import *
+from shush.boards.shush_mk1 import *

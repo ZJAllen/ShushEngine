@@ -1,6 +1,6 @@
 __author__ = 'ZJAllen'
 
-import Shush.Boards.ShushEngine_MKI as SL1
+import shush.boards.shush_mk1 as s1
 
 import spidev as spidev
 import RPi.GPIO as gpio
@@ -12,40 +12,40 @@ class Board:
 
     def __init__(self):
         # Initialize the peripherals (SPI and GPIO)
-        self.initSPI()
-        self.initGPIOState()
+        self.init_spi()
+        self.init_gpio_state()
 
-    def initGPIOState(self):
+    def init_gpio_state(self):
         # Sets the default states for the GPIO on the Shush modules.
         # Only applies to Raspberry Pi
 
-        gpio.setmode(gpio.BCM)
+        gpio.setmode(gpio.BCm)
 
         # Define chip select pins
-        gpio.setup(SL1.M0_CS, gpio.OUT)
-        gpio.setup(SL1.M1_CS, gpio.OUT)
-        gpio.setup(SL1.M2_CS, gpio.OUT)
-        gpio.setup(SL1.M3_CS, gpio.OUT)
-        gpio.setup(SL1.M4_CS, gpio.OUT)
-        gpio.setup(SL1.M5_CS, gpio.OUT)
+        gpio.setup(s1.m0_cs, gpio.OUT)
+        gpio.setup(s1.m1_cs, gpio.OUT)
+        gpio.setup(s1.m2_cs, gpio.OUT)
+        gpio.setup(s1.m3_cs, gpio.OUT)
+        gpio.setup(s1.m4_cs, gpio.OUT)
+        gpio.setup(s1.m5_cs, gpio.OUT)
 
         # Define enable pins
-        gpio.setup(SL1.M0_Enable, gpio.OUT)
-        gpio.setup(SL1.M1_Enable, gpio.OUT)
-        gpio.setup(SL1.M2_Enable, gpio.OUT)
-        gpio.setup(SL1.M3_Enable, gpio.OUT)
-        gpio.setup(SL1.M4_Enable, gpio.OUT)
-        gpio.setup(SL1.M5_Enable, gpio.OUT)
+        gpio.setup(s1.m0_enable, gpio.OUT)
+        gpio.setup(s1.m1_enable, gpio.OUT)
+        gpio.setup(s1.m2_enable, gpio.OUT)
+        gpio.setup(s1.m3_enable, gpio.OUT)
+        gpio.setup(s1.m4_enable, gpio.OUT)
+        gpio.setup(s1.m5_enable, gpio.OUT)
 
-        # Pull all CS pins HIGH (LOW initializes data transmission)
-        gpio.output(SL1.M0_CS, gpio.HIGH)
-        gpio.output(SL1.M1_CS, gpio.HIGH)
-        gpio.output(SL1.M2_CS, gpio.HIGH)
-        gpio.output(SL1.M3_CS, gpio.HIGH)
-        gpio.output(SL1.M4_CS, gpio.HIGH)
-        gpio.output(SL1.M5_CS, gpio.HIGH)
+        # Pull all cs pins HIGH (LOW initializes data transmission)
+        gpio.output(s1.m0_cs, gpio.HIGH)
+        gpio.output(s1.m1_cs, gpio.HIGH)
+        gpio.output(s1.m2_cs, gpio.HIGH)
+        gpio.output(s1.m3_cs, gpio.HIGH)
+        gpio.output(s1.m4_cs, gpio.HIGH)
+        gpio.output(s1.m5_cs, gpio.HIGH)
 
-    def initSPI(self):
+    def init_spi(self):
         # Initialize SPI Bus for motor drivers.
 
         Board.spi = spidev.SpiDev()

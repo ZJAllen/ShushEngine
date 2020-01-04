@@ -3,8 +3,6 @@ Registers from the TMC5160 datasheet:
 https://www.trinamic.com/fileadmin/assets/Products/ICs_Documents/TMC5160_Datasheet_V1.01.pdf
 '''
 
-#class TMC5160_Registers:
-
 GCONF       = 0x00
 GSTAT       = 0x01
 IFCNT       = 0x02

@@ -6,22 +6,22 @@ __author__ = 'ZJAllen'
 # TODO: Update these values once the PCB is designed.
 # Any other pin definitions neede?
 
-M0_CS = 8
-M0_Enable = 2
+m0_cs = 8
+m0_enable = 2
 
 # Need to update these as the board is developed.
 # Numbers are only placeholders
-M1_CS = 7
-M1_Enable = 3
+m1_cs = 7
+m1_enable = 3
 
-M2_CS = 1
-M2_Enable = 4
+m2_cs = 1
+m2_enable = 4
 
-M3_CS = 12
-M3_Enable = 17
+m3_cs = 12
+m3_enable = 17
 
-M4_CS = 16
-M4_Enable = 27
+m4_cs = 16
+m4_enable = 27
 
-M5_CS = 20
-M5_Enable = 22
+m5_cs = 20
+m5_enable = 22
