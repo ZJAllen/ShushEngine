@@ -4,10 +4,19 @@ from shush.board import Board, s1, gpio
 from shush.drivers import tmc5160_reg as reg
 import time
 
-from shush.params import Ramp
+
+class Ramp():
+    VSTART = 0
+    A1 = 0
+    V1 = 0
+    AMAX = 0
+    VMAX = 0
+    DMAX = 0
+    D1 = 0
+    VSTOP = 0
 
 
-class Motor(Board, Ramp):
+class Motor(Board):
 
     def __init__(self, motor: int):
         # Setting the CS and enable pins according to the motor number called
@@ -34,6 +43,9 @@ class Motor(Board, Ramp):
         # Initially apply default settings.
         # These can be configured at any time.
         self.default_settings()
+
+        # Create an instance of the Ramp class
+        self.ramp = self.Ramp()
 
     def enable_motor(self):
         # Pull Enable pin LOW to enable motor
@@ -73,55 +85,55 @@ class Motor(Board, Ramp):
 
     def set_VSTART(self, value: int):
         self.write(reg.VSTART, value)
-        Ramp.VSTART = value
+        self.ramp.VSTART = value
 
     def set_A1(self, value: int):
         self.write(reg.A1, value)
-        Ramp.A1 = value
+        self.ramp.A1 = value
 
     def set_V1(self, value: int):
         self.write(reg.V1, value)
-        Ramp.V1 = value
+        self.ramp.V1 = value
 
     def set_AMAX(self, value: int):
         self.write(reg.AMAX, value)
-        Ramp.AMAX = value
+        self.ramp.AMAX = value
 
     def set_VMAX(self, value: int):
         self.write(reg.VMAX, value)
-        Ramp.VMAX = value
+        self.ramp.VMAX = value
 
     def set_DMAX(self, value: int):
         self.write(reg.DMAX, value)
-        Ramp.DMAX = value
+        self.ramp.DMAX = value
 
     def set_D1(self, value: int):
         self.write(reg.D1, value)
-        Ramp.D1 = value
+        self.ramp.D1 = value
 
     def set_VSTOP(self, value: int):
         self.write(reg.VSTOP, value)
-        Ramp.VSTOP = value
+        self.ramp.VSTOP = value
 
     def write_ramp_params(self):
-        self.set_VSTART(Ramp.VSTART)
-        self.set_A1(Ramp.VSTART)
-        self.set_V1(Ramp.VSTART)
-        self.set_AMAX(Ramp.VSTART)
-        self.set_VMAX(Ramp.VSTART)
-        self.set_DMAX(Ramp.VSTART)
-        self.set_D1(Ramp.VSTART)
-        self.set_VSTOP(Ramp.VSTART)
+        self.set_VSTART(self.ramp.VSTART)
+        self.set_A1(self.ramp.VSTART)
+        self.set_V1(self.ramp.VSTART)
+        self.set_AMAX(self.ramp.VSTART)
+        self.set_VMAX(self.ramp.VSTART)
+        self.set_DMAX(self.ramp.VSTART)
+        self.set_D1(self.ramp.VSTART)
+        self.set_VSTOP(self.ramp.VSTART)
 
     def reset_ramp_defaults(self):
-        Ramp.VSTART = 1
-        Ramp.A1 = 25000
-        Ramp.V1 = 250000
-        Ramp.AMAX = 50000
-        Ramp.VMAX = 50000
-        Ramp.DMAX = 50000
-        Ramp.D1 = 50000
-        Ramp.VSTOP = 10
+        self.ramp.VSTART = 1
+        self.ramp.A1 = 25000
+        self.ramp.V1 = 250000
+        self.ramp.AMAX = 50000
+        self.ramp.VMAX = 50000
+        self.ramp.DMAX = 50000
+        self.ramp.D1 = 50000
+        self.ramp.VSTOP = 10
 
         self.write_ramp_params()
 
@@ -282,7 +294,7 @@ class Motor(Board, Ramp):
 
             print("Homing complete!")
 
-    def move_velocity(self, dir: int, v_max: int = Ramp.VMAX, a_max: int = Ramp.AMAX):
+    def move_velocity(self, dir: int, v_max: int = self.ramp.VMAX, a_max: int = self.ramp.AMAX):
         # Drive movor in velocity mode, positive or negative
         # If VMAX and AMAX are passed in, the ramp parameters won't
         # be overwritten.
