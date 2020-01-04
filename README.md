@@ -17,7 +17,7 @@ In your Raspberry Pi, open a new Terminal window.
 Change to the directory/folder in which you'd like to save your project.  For this example, let's just use the desktop.
 
 ```
-cd desktop
+cd Desktop
 ```
 
 To get the ShushEngine project files onto your desktop, copy/paste or type the following.
@@ -46,7 +46,7 @@ The stepper motor driver chips used are [Trinamic TMC5160](https://www.trinamic.
 
 The following example assumes the wiring according to Trinamic’s TMC5160-BOB Raspberry Pi [example](https://blog.trinamic.com/2018/02/19/stepper-motor-with-tmc5160/).
 
-Below is a simple Python script to get the motor spinning. You can copy/paste this or type it into your favorite text editor and save it on your RPi.
+Below is a simple Python script to get the motor spinning.  You can run this by typing `python3 example.py` (once you're in the `/ShushEngine` root folder).  The example code is as follows:
 
 ``` python
 import Shush
@@ -54,6 +54,7 @@ import time
 
 s = Shush.Board()
 m = Shush.Motor(0)
+m.enableMotor()
 
 # This function takes the target position as an input.
 # It prints the current position and the iteration.
@@ -75,9 +76,6 @@ while(True):
   time.sleep(0.5)
 ```
 
-Save this anywhere you’d like, on your Desktop for example. We’ll call it ShushExample.py. Change directory into that folder by `cd Desktop`.
-
-Now, you can call the script by typing `python3 ShushExample.py` and the motor should start spinning.
 
 ## Motor Driver Functionality
 

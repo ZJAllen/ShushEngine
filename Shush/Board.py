@@ -1,7 +1,15 @@
 __author__ = 'ZJAllen'
 
 import Shush.Boards.ShushEngine_MKI as SL1
-from Shush.Base import *
+
+import time
+import os
+import sys
+
+import spidev as spidev
+import RPi.GPIO as gpio
+
+gpio.setwarnings(False)
 
 class Board:
   chip = 0
