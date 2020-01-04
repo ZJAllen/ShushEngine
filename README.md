@@ -32,12 +32,6 @@ Now, change directory into the newly created `ShushEngine` folder.
 cd ShushEngine
 ```
 
-Next, since the project is made with a structure of folders, you'll need to run the setup to tell the system where all the relative references are.
-
-```
-sudo python3 setup.py install
-```
-
 You're all ready to start using the ShushEngine!
 
 ### Simple Motor Control
@@ -102,7 +96,7 @@ To put this range in perspective, if you set the position to the max or min valu
 #### Syntax:
 
 ``` python
-m.go_to(position)
+m.go_to(512000)
 ```
 
 #### Return:
@@ -128,6 +122,28 @@ current_position = m.get_position()
 #### Return:
 
 Signed position of motor [int]
+
+---
+
+### Spin at Set Velocity
+
+The `move_velocity()` method runs the motor in either the positive or negative direction. The only required argument is the direction: 0 for positive, 1 for negative.
+
+The optional arguemnts `v_max` and `a_max` are set by default, but can be changed if needed. If the velocity and/or acceleration is set in this method, it **is** retained, but not overwritten in the `Ramp()` class.  If you want to retrieve the previously set velocity and/or acceleration parameters, please see the `set_VMAX()` and `set_AMAX()` methods.
+
+This method can be called during a motion either change direction, velocity, or change from position mode to velocity mode.
+
+#### Syntax:
+
+``` python
+m.move_velocity(1)
+
+m.move_velocity(0, v_max=51200, a_max=1000)
+```
+
+#### Return:
+
+None
 
 ---
 
