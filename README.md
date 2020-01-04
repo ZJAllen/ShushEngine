@@ -49,11 +49,11 @@ The following example assumes the wiring according to Trinamic’s TMC5160-BOB R
 Below is a simple Python script to get the motor spinning.  You can run this by typing `python3 example.py` (once you're in the `/ShushEngine` root folder).  The example code is as follows:
 
 ``` python
-import Shush
+import shush
 import time
 
-s = Shush.Board()
-m = Shush.Motor(0)
+s = shush.Board()
+m = shush.Motor(0)
 m.enable_motor()
 
 

@@ -1,8 +1,8 @@
-import Shush
+import shush
 import time
 
-s = Shush.Board()
-m = Shush.Motor(0)
+s = shush.Board()
+m = shush.Motor(0)
 m.enable_motor()
 
 
