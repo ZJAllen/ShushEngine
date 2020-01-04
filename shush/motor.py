@@ -294,13 +294,16 @@ class Motor(Board):
 
             print("Homing complete!")
 
-    def move_velocity(self, dir: int, v_max: int = self.ramp.VMAX, a_max: int = self.ramp.AMAX):
+    def move_velocity(self, dir: int, v_max: int = None, a_max: int = None):
         # Drive movor in velocity mode, positive or negative
         # If VMAX and AMAX are passed in, the ramp parameters won't
         # be overwritten.
 
-        self.write(reg.VMAX, v_max)
-        self.write(reg.AMAX, a_max)
+        if v_max is not None:
+            self.write(reg.VMAX, v_max)
+
+        if a_max is not None:
+            self.write(reg.AMAX, a_max)
 
         if dir == 0:
             velocity_mode = 1
