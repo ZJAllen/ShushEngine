@@ -40,12 +40,12 @@ class Motor(Board):
             self.chip_select = s1.m5_cs
             self.enable = s1.m5_enable
 
+        # Create an instance of the Ramp class
+        self.ramp = self.Ramp()
+
         # Initially apply default settings.
         # These can be configured at any time.
         self.default_settings()
-
-        # Create an instance of the Ramp class
-        self.ramp = self.Ramp()
 
     def enable_motor(self):
         # Pull Enable pin LOW to enable motor
