@@ -75,7 +75,7 @@ class Motor(Board):
 
     # Set parameters for position ramp generator
     # If needed, modify these before using self.goTo() or other positioning
-    def setRampParams(self, VSTART = 1, A1 = 25000, V1 = 250000, AMAX = 50000, VMAX = 500000, DMAX = 50000, D1 = 50000, VSTOP = 10):
+    def setRampParams(self, VSTART=1, A1=25000, V1=250000, AMAX=50000, VMAX=500000, DMAX=50000, D1=50000, VSTOP=10):
         Motor.setRampParams.VSTART = VSTART
         Motor.setRampParams.A1 = A1
         Motor.setRampParams.V1 = V1
