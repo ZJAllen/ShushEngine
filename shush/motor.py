@@ -4,7 +4,10 @@ from shush.board import Board, s1, gpio
 from shush.drivers import tmc5160_reg as reg
 import time
 
-from shush.params import Ramp as ramp
+from shush.params import Ramp
+
+# Instantiate Ramp class as ramp
+ramp = Ramp()
 
 
 class Motor(Board):
