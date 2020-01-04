@@ -4,6 +4,8 @@ from shush.board import Board, s1, gpio
 from shush.drivers import tmc5160_reg as reg
 import time
 
+from shush.params import Ramp as ramp
+
 
 class Motor(Board):
 
@@ -38,7 +40,7 @@ class Motor(Board):
 
         gpio.output(self.enable, gpio.LOW)
 
-    def diable_motor(self):
+    def disable_motor(self):
         # Pull Enable pin HIGH to disable motor
 
         gpio.output(self.enable, gpio.HIGH)
@@ -57,7 +59,7 @@ class Motor(Board):
         # TPWMTHRS = 500
         self.write(reg.TPWMTHRS, 0x000001F4)
 
-        self.write_ramp_params()
+        self.reset_ramp_defaults()
 
         # Position mode
         self.write(reg.RAMPMODE, 0)
@@ -69,32 +71,59 @@ class Motor(Board):
     # TODO: add some more functionality...
     # Add stallGuard + coolStep (datasheet page 52)
 
-    def set_ramp_params(self, VSTART=1, A1=25000, V1=250000, AMAX=50000, VMAX=500000, DMAX=50000, D1=50000, VSTOP=10):
-        # Set parameters for position ramp generator
-        # If needed, modify these before using self.go_to() or other positions
+    def set_VSTART(self, value: int):
+        self.write(reg.VSTART, value)
+        ramp.VSTART = value
 
-        Motor.set_ramp_params.VSTART = VSTART
-        Motor.set_ramp_params.A1 = A1
-        Motor.set_ramp_params.V1 = V1
-        Motor.set_ramp_params.AMAX = AMAX
-        Motor.set_ramp_params.VMAX = VMAX
-        Motor.set_ramp_params.DMAX = DMAX
-        Motor.set_ramp_params.D1 = D1
-        Motor.set_ramp_params.VSTOP = VSTOP
+    def set_A1(self, value: int):
+        self.write(reg.A1, value)
+        ramp.A1 = value
+
+    def set_V1(self, value: int):
+        self.write(reg.V1T, value)
+        ramp.V1 = value
+
+    def set_AMAX(self, value: int):
+        self.write(reg.AMAX, value)
+        ramp.AMAX = value
+
+    def set_VMAX(self, value: int):
+        self.write(reg.VMAX, value)
+        ramp.VMAX = value
+
+    def set_DMAX(self, value: int):
+        self.write(reg.DMAX, value)
+        ramp.DMAX = value
+
+    def set_D1(self, value: int):
+        self.write(reg.D1, value)
+        ramp.D1 = value
+
+    def set_VSTOP(self, value: int):
+        self.write(reg.VSTOP, value)
+        ramp.VSTOP = value
 
     def write_ramp_params(self):
-        # Gets values from set_ramp_params() and writes them to their registers
+        self.set_VSTART(ramp.VSTART)
+        self.set_A1(ramp.VSTART)
+        self.set_V1(ramp.VSTART)
+        self.set_AMAX(ramp.VSTART)
+        self.set_VMAX(ramp.VSTART)
+        self.set_DMAX(ramp.VSTART)
+        self.set_D1(ramp.VSTART)
+        self.set_VSTOP(ramp.VSTART)
 
-        self.set_ramp_params()
+    def reset_ramp_defaults(self):
+        ramp.VSTART = 1
+        ramp.A1 = 25000
+        ramp.V1 = 250000
+        ramp.AMAX = 50000
+        ramp.VMAX = 50000
+        ramp.DMAX = 50000
+        ramp.D1 = 50000
+        ramp.VSTOP = 10
 
-        self.write(reg.VSTART, self.set_ramp_params.VSTART)
-        self.write(reg.A1, self.set_ramp_params.A1)
-        self.write(reg.V1, self.set_ramp_params.V1)
-        self.write(reg.AMAX, self.set_ramp_params.AMAX)
-        self.write(reg.VMAX, self.set_ramp_params.VMAX)
-        self.write(reg.DMAX, self.set_ramp_params.DMAX)
-        self.write(reg.D1, self.set_ramp_params.D1)
-        self.write(reg.VSTOP, self.set_ramp_params.VSTOP)
+        self.write_ramp_params()
 
     def enable_switch(self, direction: int):
         # Configure limit switch.
@@ -160,6 +189,8 @@ class Motor(Board):
 
         self.position_mode()
 
+        self.write_ramp_params()
+
         # Position range is from -2^31 to +(2^31)-1
         maximum_position = (2**31) - 1
         minimum_position = -(2**31)
@@ -174,7 +205,7 @@ class Motor(Board):
 
         self.write(reg.XTARGET, position)
 
-    def calibrateHome(self, direction: int):
+    def calibrate_home(self, direction: int):
         # Calibrate home by driving motor to limit switch.
         # This is position-based rather than velocity based
         # Direction: use 1 for left, 2 for right
@@ -251,8 +282,10 @@ class Motor(Board):
 
             print("Homing complete!")
 
-    def move_velocity(self, dir: int, v_max: int = 500000, a_max: int = 50000):
+    def move_velocity(self, dir: int, v_max: int = ramp.VMAX, a_max: int = ramp.AMAX):
         # Drive movor in velocity mode, positive or negative
+        # If VMAX and AMAX are passed in, the ramp parameters won't
+        # be overwritten.
 
         self.write(reg.VMAX, v_max)
         self.write(reg.AMAX, a_max)
@@ -264,7 +297,7 @@ class Motor(Board):
             velocity_mode = 2
             error = False
         else:
-            print("Not a valid input! Please use 'right', or 'left'.")
+            print("Not a valid input! Please use 0 (left), or 1 (right).")
             error = True
 
         if not error:
@@ -273,7 +306,9 @@ class Motor(Board):
     def stop_motor(self):
         # Stop all motion. Keep motor enabled.
 
-        self.move_velocity(1, v_max=0)
+        self.go_to(self.get_position())
+        while self.get_velocity() != 0:
+            time.sleep(0.01)
         self.hold_mode()
 
     def hold_mode(self):
