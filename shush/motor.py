@@ -7,7 +7,7 @@ import time
 from shush.params import Ramp as ramp
 
 
-class Motor(Board, Ramp):
+class Motor(Board):
 
     def __init__(self, motor: int):
         # Setting the CS and enable pins according to the motor number called
