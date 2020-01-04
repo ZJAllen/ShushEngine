@@ -1,5 +1,5 @@
 __author__ = 'ZJAllen'
 
 from Shush import *
-from Shush.Board import *
-from Shush.Motor import *
+from Shush.board import *
+from Shush.motor import *
