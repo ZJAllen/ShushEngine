@@ -117,9 +117,9 @@ class Motor(Board):
         ramp.VSTART = 1
         ramp.A1 = 25000
         ramp.V1 = 250000
-        ramp.AMAX = 50000
-        ramp.VMAX = 50000
-        ramp.DMAX = 50000
+        ramp.AMAX = 5000
+        ramp.VMAX = 500000
+        ramp.DMAX = 5000
         ramp.D1 = 50000
         ramp.VSTOP = 10
 
@@ -309,10 +309,11 @@ class Motor(Board):
     def stop_motor(self):
         # Stop all motion. Keep motor enabled.
 
-        self.go_to(self.get_position())
+        self.move_velocity(0, v_max=0)
         while self.get_velocity() != 0:
             time.sleep(0.01)
         self.hold_mode()
+        self.set_VMAX(ramp.VMAX)
 
     def hold_mode(self):
         self.write(reg.RAMPMODE, 3)
