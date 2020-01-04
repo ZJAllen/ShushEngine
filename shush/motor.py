@@ -80,7 +80,7 @@ class Motor(Board):
         ramp.A1 = value
 
     def set_V1(self, value: int):
-        self.write(reg.V1T, value)
+        self.write(reg.V1, value)
         ramp.V1 = value
 
     def set_AMAX(self, value: int):
