@@ -1,6 +1,6 @@
 __author__ = 'ZJAllen'
 
-from shush.boards import Board, s1, gpio
+from shush.board import Board, s1, gpio
 from shush.drivers import tmc5160_reg as reg
 import time
 

@@ -19,7 +19,7 @@ class Board:
         # Sets the default states for the GPIO on the Shush modules.
         # Only applies to Raspberry Pi
 
-        gpio.setmode(gpio.BCm)
+        gpio.setmode(gpio.BCM)
 
         # Define chip select pins
         gpio.setup(s1.m0_cs, gpio.OUT)

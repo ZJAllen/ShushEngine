@@ -23,7 +23,7 @@ def spin(target):
 
 while(True):
     # Spin 5 rotations from start
-    spin(2560000)
+    spin(256000)
 
     time.sleep(0.5)
     # Spin back 5 rotations to starting point
