@@ -52,7 +52,6 @@ Below is a simple Python script to get the motor spinning.  You can run this by 
 import shush
 import time
 
-s = shush.Board()
 m = shush.Motor(0)
 m.enable_motor()
 

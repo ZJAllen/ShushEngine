@@ -1,7 +1,6 @@
 import shush
 import time
 
-s = shush.Board()
 m = shush.Motor(0)
 m.enable_motor()
 
