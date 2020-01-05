@@ -118,7 +118,7 @@ class Motor(Board):
         ramp.A1 = 25000
         ramp.V1 = 250000
         ramp.AMAX = 5000
-        ramp.VMAX = 500000
+        ramp.VMAX = 1000000
         ramp.DMAX = 5000
         ramp.D1 = 50000
         ramp.VSTOP = 10
