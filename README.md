@@ -36,9 +36,9 @@ You're all ready to start using the ShushEngine!
 
 ### Simple Motor Control
 
-The stepper motor driver chips used are [Trinamic TMC5160](https://www.trinamic.com/fileadmin/assets/Products/ICs_Documents/TMC5160_Datasheet_V1.01.pdf), which use 256 microsteps per full step.  Most common stepper motors have 200 steps per revolution, or 1.8 degrees per step.  Therefore, if you want to go 1 full revolution, the TMC5160 would need a command to go 51,200 microsteps (256 * 200).  Keep this in mind for the following example.
+The stepper motor driver chips used are [Trinamic TMC5160](https://www.trinamic.com/fileadmin/assets/Products/ICs_Documents/TMC5160A_Datasheet_Rev1.14.pdf), which use 256 microsteps per full step.  Most common stepper motors have 200 steps per revolution, or 1.8 degrees per step.  Therefore, if you want to go 1 full revolution, the TMC5160 would need a command to go 51,200 microsteps (256 * 200).  Keep this in mind for the following example.
 
-The following example assumes the wiring according to Trinamic’s TMC5160-BOB Raspberry Pi [example](https://blog.trinamic.com/2018/02/19/stepper-motor-with-tmc5160/).
+The following example assumes the wiring according to Trinamic’s TMC5130-BOB Raspberry Pi [example](https://blog.trinamic.com/2019/03/29/internet-of-moving-things-tmc5130-raspberry-pi-3b/). This breakout board is similar to the TMC5160-BOB.
 
 Below is a simple Python script to get the motor spinning.  You can run this by typing `python3 example.py` (once you're in the `/ShushEngine` root folder).  The example code is as follows:
 
